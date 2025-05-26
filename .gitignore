@@ -1,0 +1,8 @@
+# Ignore credentials file
+credentials.json
+
+# Ignore Python virtual environment folders
+venv/
+.env/
+ENV/
+env/

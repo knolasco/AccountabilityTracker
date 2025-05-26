@@ -4,10 +4,25 @@ import matplotlib.pyplot as plt
 import calplot
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
+import pandas as pd
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+# Authenticate
+scope = ["https://spreadsheets.google.com/feeds",'https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+client = gspread.authorize(creds)
+
+# Open sheet
+sheet = client.open("Accountability Tracker").sheet1
+data = sheet.get_all_records()
+df = pd.DataFrame(data)
+df['Date'] = pd.to_datetime(df['Date'])
 
 
 # Load and preprocess
-df = pd.read_csv("Accountability.csv", parse_dates=['Date'])
+# df = pd.read_csv("Accountability.csv", parse_dates=['Date'])
 df.sort_values('Date', inplace=True)
 
 # Compute goal columns
