@@ -6,3 +6,6 @@ venv/
 .env/
 ENV/
 env/
+
+# Ignore Streamlit config folder
+.streamlit/

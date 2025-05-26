@@ -5,13 +5,20 @@ import calplot
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# Authenticate
-scope = ["https://spreadsheets.google.com/feeds",'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+# Define the scope of the authorization
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive"
+]
+
+# Pull the service account JSON from secrets.toml
+creds_dict = st.secrets["gcp_service_account"]
+
+# Authorize credentials with gspread
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 
 # Open sheet
