@@ -292,33 +292,33 @@ fig6.update_layout(
 )
 st.plotly_chart(fig6, use_container_width=True)
 
-# ====================
-# 📈 Correlation Matrix
-# ====================
-import seaborn as sns
+# # ====================
+# # 📈 Correlation Matrix
+# # ====================
+# import seaborn as sns
 
-st.subheader("📊 Correlation Between Metrics")
+# st.subheader("📊 Correlation Between Metrics")
 
-# Select numeric features for correlation
-corr_cols = [
-    'Calories Consumed',
-    'Calories from Exercise',
-    'Deficit',
-    'Weight',
-    'BF%',
-    'Protein > 130',
-    'Exercise Minutes',
-    'Steps'
-]
+# # Select numeric features for correlation
+# corr_cols = [
+#     'Calories Consumed',
+#     'Calories from Exercise',
+#     'Deficit',
+#     'Weight',
+#     'BF%',
+#     'Protein > 130',
+#     'Exercise Minutes',
+#     'Steps'
+# ]
 
-# Clean and compute correlations
-corr_data = df_filtered[corr_cols].copy()
-corr_data['Protein > 130'] = corr_data['Protein > 130'].astype(int)
-corr_matrix = corr_data.corr()
+# # Clean and compute correlations
+# corr_data = df_filtered[corr_cols].copy()
+# corr_data['Protein > 130'] = corr_data['Protein > 130'].astype(int)
+# corr_matrix = corr_data.corr()
 
-# Plot heatmap
-fig_corr, ax_corr = plt.subplots(figsize=(8, 6))
-sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, fmt=".2f", ax=ax_corr)
-ax_corr.set_title("Correlation Matrix")
-fig_corr.tight_layout()
-st.pyplot(fig_corr)
+# # Plot heatmap
+# fig_corr, ax_corr = plt.subplots(figsize=(8, 6))
+# sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, fmt=".2f", ax=ax_corr)
+# ax_corr.set_title("Correlation Matrix")
+# fig_corr.tight_layout()
+# st.pyplot(fig_corr)
