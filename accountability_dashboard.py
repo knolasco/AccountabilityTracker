@@ -8,18 +8,15 @@ import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# Define the scope of the authorization
-scope = [
-    "https://spreadsheets.google.com/feeds",
-    "https://www.googleapis.com/auth/drive"
-]
+# Define scope for Google Sheets and Google Drive access
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-# Pull the service account JSON from secrets.toml
-creds_dict = st.secrets["gcp_service_account"]
+# Load credentials from Streamlit secrets
+creds_dict = st.secrets["google"]
 
-# Authorize credentials with gspread
-creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-client = gspread.authorize(creds)
+# Authenticate
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+client = gspread.authorize(credentials)
 
 # Open sheet
 sheet = client.open("Accountability Tracker").sheet1
