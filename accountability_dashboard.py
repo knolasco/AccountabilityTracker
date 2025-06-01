@@ -136,27 +136,27 @@ st.subheader("📅 Goal Completion Calendar (Current Month)")
 # Convert Date to datetime (just in case)
 df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
 
-# Get current month and year
-today = pd.Timestamp.today()
-current_month_data = df_filtered[
-    (df_filtered['Date'].dt.month == today.month) &
-    (df_filtered['Date'].dt.year == today.year)
-]
+# # Get current month and year
+# today = pd.Timestamp.today()
+# current_month_data = df_filtered[
+#     (df_filtered['Date'].dt.month == today.month) &
+#     (df_filtered['Date'].dt.year == today.year)
+# ]
 
-# Use 1 for goal met, 0 for not met
-calendar_data = current_month_data.set_index('Date')['All_Goals_Met'].astype(int)
+# # Use 1 for goal met, 0 for not met
+# calendar_data = current_month_data.set_index('Date')['All_Goals_Met'].astype(int)
 
-# Generate calendar heatmap
-fig_cal, ax_cal = calplot.calplot(
-    calendar_data,
-    how='sum',
-    cmap='OrRd',
-    figsize=(12, 3.5),
-    colorbar=True,
-    suptitle='Days All Goals Met – This Month',
-)
+# # Generate calendar heatmap
+# fig_cal, ax_cal = calplot.calplot(
+#     calendar_data,
+#     how='sum',
+#     cmap='OrRd',
+#     figsize=(12, 3.5),
+#     colorbar=True,
+#     suptitle='Days All Goals Met – This Month',
+# )
 
-st.pyplot(fig_cal)
+# st.pyplot(fig_cal)
 
 # ⚖️ Body Weight Trend
 st.subheader("⚖️ Body Weight Trend")
