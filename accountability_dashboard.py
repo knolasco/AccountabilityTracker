@@ -236,9 +236,9 @@ st.plotly_chart(fig_weight_compare, use_container_width=True)
 st.subheader("👣 Daily Steps")
 fig3 = go.Figure()
 fig3.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Steps'],
-                          mode='lines+markers', name='Daily Steps', line=dict(color='violet')))
+                          mode='lines+markers', name='Daily Steps', line=dict(color='#4e79a7')))
 fig3.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Steps'],
-                          mode='lines', name='7-Day Avg', line=dict(color='purple', width=3)))
+                          mode='lines', name='7-Day Avg', line=dict(color='#f28e2c', width=3)))
 fig3.add_hline(y=10000, line_dash="dash", line_color="orange", annotation_text="Goal: 10,000", annotation_position="top left")
 fig3.update_layout(
     xaxis_title='Date',
@@ -258,9 +258,9 @@ st.plotly_chart(fig3, use_container_width=True)
 st.subheader("🔥 Daily Calories Consumed")
 fig4 = go.Figure()
 fig4.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories Consumed'],
-                          mode='lines+markers', name='Daily Consumed Calories', line=dict(color='violet')))
+                          mode='lines+markers', name='Daily Consumed Calories', line=dict(color='#76b7b2')))
 fig4.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'],
-                          mode='lines', name='7-Day Avg', line=dict(color='purple', width=3)))
+                          mode='lines', name='7-Day Avg', line=dict(color='#e15759', width=3)))
 fig4.update_layout(
     xaxis_title='Date',
     yaxis_title='Calories',
@@ -278,9 +278,9 @@ st.plotly_chart(fig4, use_container_width=True)
 st.subheader("🏃 Daily Calories from Exercise")
 fig5 = go.Figure()
 fig5.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories from Exercise'],
-                          mode='lines+markers', name='Daily Burned Calories', line=dict(color='violet')))
+                          mode='lines+markers', name='Daily Burned Calories', line=dict(color='#59a14f')))
 fig5.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'],
-                          mode='lines', name='7-Day Avg', line=dict(color='purple', width=3)))
+                          mode='lines', name='7-Day Avg', line=dict(color='#edc949', width=3)))
 fig5.update_layout(
     xaxis_title='Date',
     yaxis_title='Calories Burned',
@@ -298,9 +298,9 @@ st.plotly_chart(fig5, use_container_width=True)
 st.subheader("📉 Daily Caloric Deficit")
 fig6 = go.Figure()
 fig6.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Deficit'],
-                          mode='lines+markers', name='Deficit', line=dict(color='black')))
+                          mode='lines+markers', name='Deficit', line=dict(color='#af7aa1')))
 fig6.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Deficit'],
-                          mode='lines+markers', name='7-Day Avg', line=dict(color='grey', width=3)))
+                          mode='lines+markers', name='7-Day Avg', line=dict(color='#ff9da7', width=3)))
 fig6.add_hline(y=0, line_dash="dash", line_color="red", annotation_text="No Deficit", annotation_position="top left")
 fig6.update_layout(
     xaxis_title='Date',
