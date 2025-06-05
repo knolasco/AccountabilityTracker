@@ -248,7 +248,9 @@ fig3.update_layout(
     paper_bgcolor='white',
     font=dict(color='black'),
     xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
+    legend=dict(font=dict(color='black'))  
+
 )
 st.plotly_chart(fig3, use_container_width=True)
 
@@ -267,7 +269,8 @@ fig4.update_layout(
     paper_bgcolor='white',
     font=dict(color='black'),
     xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
+    legend=dict(font=dict(color='black')) 
 )
 st.plotly_chart(fig4, use_container_width=True)
 
@@ -286,7 +289,8 @@ fig5.update_layout(
     paper_bgcolor='white',
     font=dict(color='black'),
     xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
+    legend=dict(font=dict(color='black')) 
 )
 st.plotly_chart(fig5, use_container_width=True)
 
@@ -306,7 +310,8 @@ fig6.update_layout(
     paper_bgcolor='white',
     font=dict(color='black'),
     xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
+    legend=dict(font=dict(color='black')) 
 )
 st.plotly_chart(fig6, use_container_width=True)
 
