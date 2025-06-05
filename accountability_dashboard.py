@@ -279,7 +279,7 @@ st.subheader("🏃 Daily Calories from Exercise")
 fig5 = go.Figure()
 fig5.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories from Exercise'],
                           mode='lines+markers', name='Daily Burned Calories', line=dict(color='#59a14f')))
-fig5.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'],
+fig5.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Activity_Calories'],
                           mode='lines', name='7-Day Avg', line=dict(color='#edc949', width=3)))
 fig5.update_layout(
     xaxis_title='Date',
