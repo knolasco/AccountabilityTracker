@@ -43,6 +43,10 @@ df['7Day_Rolling_Steps'] = df['Steps'].rolling(window = 7, min_periods = 1).mean
 df['7Day_Rolling_Activity_Calories'] = df['Calories from Exercise'].rolling(window = 7, min_periods=1).mean()
 df['7Day_Rolling_Consumed_Calories'] = df['Calories Consumed'].rolling(window = 7, min_periods=1).mean()
 
+# Rate of change (day-to-day difference) of 7-day rolling average weight
+df['7Day_Rolling_Weight_Change'] = df['7Day_Rolling_Weight'].diff()
+
+
 # Sidebar filters
 st.sidebar.title("📅 Filters")
 start_date = st.sidebar.date_input("Start Date", df['Date'].min())
@@ -185,6 +189,30 @@ fig1.update_layout(
     legend=dict(font=dict(color='black'))  # <-- Add this line
 )
 st.plotly_chart(fig1, use_container_width=True)
+
+# 📈 Rate of Change of 7-Day Rolling Weight
+st.subheader("📈 Rate of Change – 7-Day Rolling Avg Weight")
+
+fig_change = go.Figure()
+fig_change.add_trace(go.Bar(
+    x=df_filtered['Date'],
+    y=df_filtered['7Day_Rolling_Weight_Change'],
+    marker_color=df_filtered['7Day_Rolling_Weight_Change'].apply(lambda x: 'red' if x > 0 else 'green'),
+    name="Daily Change"
+))
+fig_change.add_hline(y=0, line_dash="dash", line_color="black")
+fig_change.update_layout(
+    xaxis_title='Date',
+    yaxis_title='Change in 7-Day Avg Weight (lbs)',
+    xaxis_tickangle=-45,
+    plot_bgcolor='white',
+    paper_bgcolor='white',
+    font=dict(color='black'),
+    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
+    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+)
+st.plotly_chart(fig_change, use_container_width=True)
+
 
 # 💪 Body Fat % Trend
 st.subheader("💪 Body Fat % Trend")
