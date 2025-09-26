@@ -46,8 +46,9 @@ df['7Day_Rolling_Consumed_Calories'] = df['Calories Consumed'].rolling(window = 
 # Rate of change (day-to-day difference) of 7-day rolling average weight
 df['7Day_Rolling_Weight_Change'] = df['7Day_Rolling_Weight'].diff()
 
-# Cumulative deficit over time
+# Compute cumulative deficit & weight loss
 df['Cumulative_Deficit'] = df['Deficit'].cumsum()
+df['Cumulative_Weight_Lost'] = df['Cumulative_Deficit'] / 3500
 
 
 # Sidebar filters
@@ -352,10 +353,6 @@ st.plotly_chart(fig6, use_container_width=True)
 
 # 📊 Cumulative Caloric Deficit (with Estimated Weight Loss)
 st.subheader("📊 Cumulative Caloric Deficit & Estimated Weight Loss")
-
-# Compute cumulative deficit & weight loss
-df['Cumulative_Deficit'] = df['Deficit'].cumsum()
-df['Cumulative_Weight_Lost'] = df['Cumulative_Deficit'] / 3500
 
 fig_cum_deficit = go.Figure()
 
