@@ -46,6 +46,9 @@ df['7Day_Rolling_Consumed_Calories'] = df['Calories Consumed'].rolling(window = 
 # Rate of change (day-to-day difference) of 7-day rolling average weight
 df['7Day_Rolling_Weight_Change'] = df['7Day_Rolling_Weight'].diff()
 
+# Cumulative deficit over time
+df['Cumulative_Deficit'] = df['Deficit'].cumsum()
+
 
 # Sidebar filters
 st.sidebar.title("📅 Filters")
@@ -346,6 +349,38 @@ fig6.update_layout(
     legend=dict(font=dict(color='black')) 
 )
 st.plotly_chart(fig6, use_container_width=True)
+
+# 📊 Cumulative Caloric Deficit
+st.subheader("📊 Cumulative Caloric Deficit")
+
+fig_cum_deficit = go.Figure()
+fig_cum_deficit.add_trace(go.Scatter(
+    x=df_filtered['Date'],
+    y=df_filtered['Cumulative_Deficit'],
+    mode='lines',
+    name='Cumulative Deficit',
+    line=dict(color='blue', width=3)
+))
+fig_cum_deficit.add_hline(
+    y=0,
+    line_dash="dash",
+    line_color="red",
+    annotation_text="No Net Deficit",
+    annotation_position="top left"
+)
+fig_cum_deficit.update_layout(
+    xaxis_title='Date',
+    yaxis_title='Cumulative Deficit (kcal)',
+    xaxis_tickangle=-45,
+    plot_bgcolor='white',
+    paper_bgcolor='white',
+    font=dict(color='black'),
+    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
+    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+)
+st.plotly_chart(fig_cum_deficit, use_container_width=True)
+
+
 
 # # ====================
 # # 📈 Correlation Matrix
