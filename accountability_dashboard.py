@@ -350,17 +350,36 @@ fig6.update_layout(
 )
 st.plotly_chart(fig6, use_container_width=True)
 
-# 📊 Cumulative Caloric Deficit
-st.subheader("📊 Cumulative Caloric Deficit")
+# 📊 Cumulative Caloric Deficit (with Estimated Weight Loss)
+st.subheader("📊 Cumulative Caloric Deficit & Estimated Weight Loss")
+
+# Compute cumulative deficit & weight loss
+df['Cumulative_Deficit'] = df['Deficit'].cumsum()
+df['Cumulative_Weight_Lost'] = df['Cumulative_Deficit'] / 3500
 
 fig_cum_deficit = go.Figure()
+
+# Primary y-axis trace (Cumulative Deficit in kcal)
 fig_cum_deficit.add_trace(go.Scatter(
     x=df_filtered['Date'],
     y=df_filtered['Cumulative_Deficit'],
     mode='lines',
-    name='Cumulative Deficit',
-    line=dict(color='blue', width=3)
+    name='Cumulative Deficit (kcal)',
+    line=dict(color='blue', width=3),
+    yaxis="y1"
 ))
+
+# Secondary y-axis trace (Cumulative Weight Lost in lbs)
+fig_cum_deficit.add_trace(go.Scatter(
+    x=df_filtered['Date'],
+    y=df_filtered['Cumulative_Weight_Lost'],
+    mode='lines',
+    name='Estimated Weight Lost (lbs)',
+    line=dict(color='green', width=3, dash="dot"),
+    yaxis="y2"
+))
+
+# Add reference line for no deficit
 fig_cum_deficit.add_hline(
     y=0,
     line_dash="dash",
@@ -368,17 +387,29 @@ fig_cum_deficit.add_hline(
     annotation_text="No Net Deficit",
     annotation_position="top left"
 )
+
+# Layout with dual y-axes
 fig_cum_deficit.update_layout(
     xaxis_title='Date',
-    yaxis_title='Cumulative Deficit (kcal)',
+    yaxis=dict(
+        title='Cumulative Deficit (kcal)',
+        color='blue'
+    ),
+    yaxis2=dict(
+        title='Estimated Weight Lost (lbs)',
+        overlaying='y',
+        side='right',
+        color='green'
+    ),
     xaxis_tickangle=-45,
     plot_bgcolor='white',
     paper_bgcolor='white',
     font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
 )
+
 st.plotly_chart(fig_cum_deficit, use_container_width=True)
+
 
 
 
