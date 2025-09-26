@@ -390,13 +390,13 @@ fig_cum_deficit.update_layout(
     xaxis_title='Date',
     yaxis=dict(
         title='Cumulative Deficit (kcal)',
-        color='blue'
+        color='black'
     ),
     yaxis2=dict(
         title='Estimated Weight Lost (lbs)',
         overlaying='y',
         side='right',
-        color='green'
+        color='black'
     ),
     xaxis_tickangle=-45,
     plot_bgcolor='white',
