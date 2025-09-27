@@ -176,9 +176,30 @@ df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
 
 
 # === PLOTTING SECTION ===
+# ⚖️ Estimated vs Actual Weight Lost
+st.subheader("⚖️ Estimated vs Actual Weight Lost")
+estimated_weight_lost = df_filtered['Deficit'].sum() / 3500 if len(df_filtered) > 0 else 0
+actual_weight_lost = df_filtered['Weight'].iloc[0] - df_filtered['7Day_Rolling_Weight'].iloc[-1] if len(df_filtered) > 0 else 0
 
-# Create subplot grid: 8 plots total → 2 rows x 4 cols
-fig = make_subplots(rows=2, cols=4)
+fig_weight_compare = go.Figure()
+fig_weight_compare.add_trace(go.Bar(
+    x=['Estimated', 'Actual'],
+    y=[estimated_weight_lost, actual_weight_lost],
+    marker_color=['#636EFA', '#EF553B'],
+    text=[f"{estimated_weight_lost:.1f}", f"{actual_weight_lost:.1f}"],
+    textposition='auto'
+))
+fig_weight_compare.update_layout(
+    xaxis=dict(showticklabels=True, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    showlegend=False
+)
+st.plotly_chart(fig_weight_compare, use_container_width=True)
+
+# Create subplot grid: 12 plots total → 2 rows x 4 cols
+fig = make_subplots(rows=4, cols=4)
 
 # Define colors for each plot
 colors = [
@@ -188,14 +209,20 @@ colors = [
 
 # Define traces (replace/add more as needed)
 plots = [
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories'], mode='lines', line=dict(color=colors[0], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Deficit'], mode='lines', line=dict(color=colors[1], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'], mode='lines', line=dict(color=colors[2], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Protein'], mode='lines', line=dict(color=colors[3], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Carbs'], mode='lines', line=dict(color=colors[4], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Fat'], mode='lines', line=dict(color=colors[5], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Steps'], mode='lines', line=dict(color=colors[6], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Sleep'], mode='lines', line=dict(color=colors[7], width=2))
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Weight'], mode='lines', line=dict(color=colors[0], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight'], mode='lines', line=dict(color=colors[1], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight_Change'], mode='lines', line=dict(color=colors[2], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['BF%'], mode='lines', line=dict(color=colors[3], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_BF'], mode='lines', line=dict(color=colors[4], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Steps'], mode='lines', line=dict(color=colors[5], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Steps'], mode='lines', line=dict(color=colors[6], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories Consumed'], mode='lines', line=dict(color=colors[7], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'], mode='lines', line=dict(color=colors[7], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories from Exercise'], mode='lines', line=dict(color=colors[7], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Activity_Calories'], mode='lines', line=dict(color=colors[7], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Deficit'], mode='lines', line=dict(color=colors[7], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Deficit'], mode='lines', line=dict(color=colors[7], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'], mode='lines', line=dict(color=colors[7], width=2)),
 ]
 
 # Add traces to subplot grid
