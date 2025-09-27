@@ -209,62 +209,58 @@ paired_plots = [
     ('Deficit', '7Day_Rolling_Deficit'),
 ]
 
-for i, (raw, rolling) in enumerate(paired_plots):
+# Add the first 6 paired plots to first 3 rows
+for i, (raw, rolling) in enumerate(paired_plots[:6]):
     row = (i // 2) + 1
     col = (i % 2) + 1
-    # Raw line
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[raw],
             mode='lines', line=dict(color=colors[i], width=2),
-            name=raw
+            name=raw, showlegend=False
         ),
         row=row, col=col
     )
-    # Rolling line
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[rolling],
             mode='lines', line=dict(color=colors[i], width=3, dash='dash'),
-            name=f"{rolling} (7D)"
+            name=f"{rolling} (7D)", showlegend=False
         ),
         row=row, col=col
     )
 
-# 7-Day Rolling Weight Change as bar with y=0 line
+# 7-Day Rolling Weight Change (full row)
 fig.add_trace(
     go.Bar(
         x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight_Change'],
-        marker_color=colors[6], name='7D Rolling Weight Change'
+        marker_color=colors[6], name='7D Rolling Weight Change', showlegend=False
     ),
-    row=3, col=2
+    row=4, col=1
 )
-fig.add_hline(y=0, line_dash="dash", line_color="black", row=3, col=2)
+fig.add_hline(y=0, line_dash="dash", line_color="black", row=4, col=1)
 
-# Cumulative Deficit
+# Cumulative Deficit (last subplot)
 fig.add_trace(
     go.Scatter(
         x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'],
         mode='lines', line=dict(color=colors[7], width=2),
-        name='Cumulative Deficit'
+        name='Cumulative Deficit', showlegend=False
     ),
     row=4, col=2
 )
 
 # Global layout
 fig.update_layout(
-    height=1600,  # make taller for readability
-    showlegend=True,
+    height=1600,
+    showlegend=False,
     plot_bgcolor='white',
     paper_bgcolor='white',
-    font=dict(color='black'),  # global font color
-    legend=dict(font=dict(color='black'))  # legend text color
+    font=dict(color='black')
 )
 
 # Make Y-axis values visible and black
 fig.update_yaxes(showticklabels=True, zeroline=False, tickfont=dict(color='black'))
-
-# Optional: X-axis can remain hidden if you want compact view
 fig.update_xaxes(showticklabels=False, zeroline=False)
 
 # Render in Streamlit
