@@ -178,28 +178,31 @@ df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
 # st.pyplot(fig_cal)
 
 
-# === PLOTTING SECTION ===
-# ⚖️ Estimated vs Actual Weight Lost
-st.subheader("⚖️ Estimated vs Actual Weight Lost")
-estimated_weight_lost = df_filtered['Deficit'].sum() / 3500 if len(df_filtered) > 0 else 0
-actual_weight_lost = df_filtered['Weight'].iloc[0] - df_filtered['7Day_Rolling_Weight'].iloc[-1] if len(df_filtered) > 0 else 0
+# # === PLOTTING SECTION ===
+# # ⚖️ Estimated vs Actual Weight Lost
+# st.subheader("⚖️ Estimated vs Actual Weight Lost")
+# estimated_weight_lost = df_filtered['Deficit'].sum() / 3500 if len(df_filtered) > 0 else 0
+# actual_weight_lost = df_filtered['Weight'].iloc[0] - df_filtered['7Day_Rolling_Weight'].iloc[-1] if len(df_filtered) > 0 else 0
 
-fig_weight_compare = go.Figure()
-fig_weight_compare.add_trace(go.Bar(
-    x=['Estimated', 'Actual'],
-    y=[estimated_weight_lost, actual_weight_lost],
-    marker_color=['#636EFA', '#EF553B'],
-    text=[f"{estimated_weight_lost:.1f}", f"{actual_weight_lost:.1f}"],
-    textposition='auto'
-))
-fig_weight_compare.update_layout(
-    xaxis=dict(showticklabels=True, showgrid=False, zeroline=False),
-    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
-    plot_bgcolor='white', paper_bgcolor='white',
-    margin=dict(l=10, r=10, t=25, b=10),
-    showlegend=False
-)
-st.plotly_chart(fig_weight_compare, use_container_width=True)
+# fig_weight_compare = go.Figure()
+# fig_weight_compare.add_trace(go.Bar(
+#     x=['Estimated', 'Actual'],
+#     y=[estimated_weight_lost, actual_weight_lost],
+#     marker_color=['#636EFA', '#EF553B'],
+#     text=[f"{estimated_weight_lost:.1f}", f"{actual_weight_lost:.1f}"],
+#     textposition='auto'
+# ))
+# fig_weight_compare.update_layout(
+#     xaxis=dict(showticklabels=True, showgrid=False, zeroline=False),
+#     yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+#     plot_bgcolor='white', paper_bgcolor='white',
+#     margin=dict(l=10, r=10, t=25, b=10),
+#     showlegend=False
+# )
+# st.plotly_chart(fig_weight_compare, use_container_width=True)
+
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 # Short titles for each plot
 plot_titles = [
@@ -219,10 +222,8 @@ plot_titles = [
     "Cumulative Deficit"
 ]
 
-# Create subplot grid: 12 plots total → 2 rows x 4 cols
-fig = make_subplots(rows=4, cols=4, subplot_titles = plot_titles)
-
-
+# Create subplot grid: 14 plots total → 4 rows x 4 cols
+fig = make_subplots(rows=4, cols=4, subplot_titles=plot_titles)
 
 # Define a color palette with enough distinct colors using the requested hex codes
 colors = [
@@ -230,7 +231,7 @@ colors = [
     "#ac3a44", "#dbb13b", "#536437",
     "#ac3a44", "#dbb13b", "#536437",
     "#ac3a44", "#dbb13b", "#536437",
-    "#ac3a44", "#dbb13b", "#536437"
+    "#ac3a44", "#dbb13b"
 ]
 
 # Define traces
@@ -257,18 +258,19 @@ for i, trace in enumerate(plots):
     col = (i % 4) + 1
     fig.add_trace(trace, row=row, col=col)
 
-# Global layout for compact sparklines
+# Global layout for taller plots and black text
 fig.update_layout(
     showlegend=False,
-    height=600,  # adjust depending on number of rows
-    margin=dict(l=5, r=5, t=10, b=5),
+    height=1200,  # taller plots
+    margin=dict(l=5, r=5, t=30, b=5),
     plot_bgcolor="white",
-    paper_bgcolor="white"
+    paper_bgcolor="white",
+    font=dict(color="black")  # all text (titles, annotations, labels) in black
 )
 
 # Remove ticks, labels, and grids for compactness
-fig.update_xaxes(showticklabels=False, zeroline=False)
-fig.update_yaxes(showticklabels=False, zeroline=False)
+fig.update_xaxes(showticklabels=False, zeroline=False, showgrid=False)
+fig.update_yaxes(showticklabels=False, zeroline=False, showgrid=False)
 
 # Render in Streamlit
-st.plotly_chart(fig)
+st.plotly_chart(fig, use_container_width=True)
