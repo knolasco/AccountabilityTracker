@@ -61,18 +61,14 @@ end_date = st.sidebar.date_input("End Date", df['Date'].max())
 df_filtered = df[(df['Date'] >= pd.to_datetime(start_date)) & (df['Date'] <= pd.to_datetime(end_date))]
 
 st.title("🏋️ Accountability Tracker")
+# ====================
+# ✅ Goal Completion + Summary Stats + Streaks Adaptive Layout
+# ====================
 
-# ====================
-# ✅ Goal Completion
-# ====================
+# Compute values
 goal_days = df_filtered['All_Goals_Met'].sum()
 total_days = len(df_filtered)
 percent = (goal_days / total_days) * 100 if total_days else 0
-st.metric("✅ Days All Goals Met", f"{goal_days} / {total_days} ({percent:.1f}%)")
-
-# ====================
-# 🔥 Summary Stats (Updated with Weight/BF% Lost)
-# ====================
 
 starting_weight = df_filtered['Weight'].iloc[0]
 latest_avg_weight = df_filtered['7Day_Rolling_Weight'].iloc[-1]
@@ -82,35 +78,12 @@ starting_bf = df_filtered['BF%'].iloc[0]
 latest_avg_bf = df_filtered['7Day_Rolling_BF'].iloc[-1]
 bf_lost = starting_bf - latest_avg_bf
 
-# Display weight/BF% lost first
-col0, col00 = st.columns(2)
-with col0:
-    st.metric("⚖️ Weight Lost", f"{weight_lost:.1f} lbs")
-with col00:
-    st.metric("💪 Body Fat % Lost", f"{bf_lost:.1f}%")
+avg_calories = df_filtered['Calories Consumed'].mean()
+avg_deficit = df_filtered['Deficit'].mean()
+avg_steps = df_filtered['Steps'].mean()
+avg_exercise_cal = df_filtered['Calories from Exercise'].mean()
 
-# Existing stats
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric("🔥 Avg Calories Consumed", f"{df_filtered['Calories Consumed'].mean():.0f} kcal")
-with col2:
-    st.metric("📉 Avg Daily Deficit", f"{df_filtered['Deficit'].mean():.0f} kcal")
-with col3:
-    st.metric("👣 Avg Daily Steps", f"{df_filtered['Steps'].mean():.0f}")
-
-col4, col5 = st.columns(2)
-with col4:
-    st.metric("🏃 Avg Exercise Calories", f"{df_filtered['Calories from Exercise'].mean():.0f} kcal")
-with col5:
-    st.metric("⚖️ Rolling 7 Day Weight", f"{latest_avg_weight:.0f} lbs")
-
-# ====================
-# 🔁 Goal Streak Counters
-# ====================
-
-st.subheader("🔁 Goal Streaks")
-
-# Helper to compute streaks
+# Compute streaks
 def compute_streaks(series):
     max_streak = curr_streak = 0
     last_date = None
@@ -126,26 +99,34 @@ def compute_streaks(series):
         last_date = date
     return max_streak
 
-# Use 'Date' as index to compute streaks cleanly
-df_streak = df_filtered.copy()
-df_streak = df_streak.set_index('Date')
+df_streak = df_filtered.copy().set_index('Date')
 longest_streak = compute_streaks(df_streak['All_Goals_Met'])
-
-# Compute current streak
-today_or_latest = df_streak.index.max()
-reversed_days = df_streak.sort_index(ascending=False)
 current_streak = 0
-for met in reversed_days['All_Goals_Met']:
+for met in df_streak.sort_index(ascending=False)['All_Goals_Met']:
     if met:
         current_streak += 1
     else:
         break
 
-col_streak1, col_streak2 = st.columns(2)
-with col_streak1:
-    st.metric("🔥 Longest Streak (All Goals Met)", f"{longest_streak} days")
-with col_streak2:
-    st.metric("🔥 Current Streak", f"{current_streak} days")
+# Adaptive layout: define metrics in rows of 4 for smaller screens
+metrics = [
+    ("✅ Days All Goals Met", f"{goal_days}/{total_days} ({percent:.1f}%)"),
+    ("⚖️ Weight Lost", f"{weight_lost:.1f} lbs"),
+    ("💪 Body Fat % Lost", f"{bf_lost:.1f}%"),
+    ("🔥 Avg Calories Consumed", f"{avg_calories:.0f} kcal"),
+    ("📉 Avg Daily Deficit", f"{avg_deficit:.0f} kcal"),
+    ("👣 Avg Daily Steps", f"{avg_steps:.0f}"),
+    ("🏃 Avg Exercise Calories", f"{avg_exercise_cal:.0f} kcal"),
+    ("🔥 Longest Streak", f"{longest_streak} days"),
+    ("🔥 Current Streak", f"{current_streak} days")
+]
+
+# Display metrics in rows of 4
+cols_per_row = 4
+for i in range(0, len(metrics), cols_per_row):
+    cols = st.columns(min(cols_per_row, len(metrics) - i))
+    for col, (title, value) in zip(cols, metrics[i:i+cols_per_row]):
+        col.metric(title, value)
 
 # ====================
 # 📅 Calendar View of Goal Completion (Current Month Only)
