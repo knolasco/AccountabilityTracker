@@ -207,22 +207,49 @@ colors = [
     "orange", "brown", "teal", "magenta"
 ]
 
-# Define traces (replace/add more as needed)
+# Short titles for each plot
+plot_titles = [
+    "Weight",
+    "7D Rolling Weight",
+    "7D Rolling Weight Change",
+    "Body Fat %",
+    "7D Rolling BF%",
+    "Steps",
+    "7D Rolling Steps",
+    "Calories Consumed",
+    "7D Rolling Consumed Calories",
+    "Exercise Calories",
+    "7D Rolling Exercise Calories",
+    "Deficit",
+    "7D Rolling Deficit",
+    "Cumulative Deficit"
+]
+
+# Define a color palette with enough distinct colors using the requested hex codes
+colors = [
+    "#ac3a44", "#dbb13b", "#536437",
+    "#ac3a44", "#dbb13b", "#536437",
+    "#ac3a44", "#dbb13b", "#536437",
+    "#ac3a44", "#dbb13b", "#536437",
+    "#ac3a44", "#dbb13b", "#536437"
+]
+
+# Define traces
 plots = [
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Weight'], mode='lines', line=dict(color=colors[0], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight'], mode='lines', line=dict(color=colors[1], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight_Change'], mode='lines', line=dict(color=colors[2], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['BF%'], mode='lines', line=dict(color=colors[3], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_BF'], mode='lines', line=dict(color=colors[4], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Steps'], mode='lines', line=dict(color=colors[5], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Steps'], mode='lines', line=dict(color=colors[6], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories Consumed'], mode='lines', line=dict(color=colors[7], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'], mode='lines', line=dict(color=colors[7], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories from Exercise'], mode='lines', line=dict(color=colors[7], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Activity_Calories'], mode='lines', line=dict(color=colors[7], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Deficit'], mode='lines', line=dict(color=colors[7], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Deficit'], mode='lines', line=dict(color=colors[7], width=2)),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'], mode='lines', line=dict(color=colors[7], width=2)),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Weight'], mode='lines', line=dict(color=colors[0], width=2), name=plot_titles[0]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight'], mode='lines', line=dict(color=colors[1], width=2), name=plot_titles[1]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight_Change'], mode='lines', line=dict(color=colors[2], width=2), name=plot_titles[2]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['BF%'], mode='lines', line=dict(color=colors[3], width=2), name=plot_titles[3]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_BF'], mode='lines', line=dict(color=colors[4], width=2), name=plot_titles[4]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Steps'], mode='lines', line=dict(color=colors[5], width=2), name=plot_titles[5]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Steps'], mode='lines', line=dict(color=colors[6], width=2), name=plot_titles[6]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories Consumed'], mode='lines', line=dict(color=colors[7], width=2), name=plot_titles[7]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'], mode='lines', line=dict(color=colors[8], width=2), name=plot_titles[8]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories from Exercise'], mode='lines', line=dict(color=colors[9], width=2), name=plot_titles[9]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Activity_Calories'], mode='lines', line=dict(color=colors[10], width=2), name=plot_titles[10]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Deficit'], mode='lines', line=dict(color=colors[11], width=2), name=plot_titles[11]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Deficit'], mode='lines', line=dict(color=colors[12], width=2), name=plot_titles[12]),
+    go.Scatter(x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'], mode='lines', line=dict(color=colors[13], width=2), name=plot_titles[13]),
 ]
 
 # Add traces to subplot grid
