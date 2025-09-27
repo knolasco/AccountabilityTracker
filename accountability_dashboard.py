@@ -182,76 +182,87 @@ df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
 # )
 # st.plotly_chart(fig_weight_compare, use_container_width=True)
 
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-
-# Short titles for each plot
+# ====================
+# Short titles for each subplot
 plot_titles = [
-    "Weight",
-    "7D Rolling Weight",
-    "7D Rolling Weight Change",
-    "Body Fat %",
-    "7D Rolling BF%",
-    "Steps",
-    "7D Rolling Steps",
-    "Calories Consumed",
-    "7D Rolling Consumed Calories",
-    "Exercise Calories",
-    "7D Rolling Exercise Calories",
-    "Deficit",
-    "7D Rolling Deficit",
-    "Cumulative Deficit"
+    "Weight", "BF%", "Steps",
+    "Calories Consumed", "Exercise Calories", "Deficit",
+    "7-Day Rolling Weight Change", "Cumulative Deficit"
 ]
 
-# Create subplot grid: 14 plots total → 4 rows x 4 cols
-fig = make_subplots(rows=4, cols=4, subplot_titles=plot_titles)
-
-# Define a color palette with enough distinct colors using the requested hex codes
+# Colors for each subplot pair
 colors = [
-    "#ac3a44", "#dbb13b", "#536437",
-    "#ac3a44", "#dbb13b", "#536437",
-    "#ac3a44", "#dbb13b", "#536437",
-    "#ac3a44", "#dbb13b", "#536437",
-    "#ac3a44", "#dbb13b"
+    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728",
+    "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"
 ]
 
-# Define traces
-plots = [
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Weight'], mode='lines', line=dict(color=colors[0], width=2), name=plot_titles[0]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight'], mode='lines', line=dict(color=colors[1], width=2), name=plot_titles[1]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight_Change'], mode='lines', line=dict(color=colors[2], width=2), name=plot_titles[2]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['BF%'], mode='lines', line=dict(color=colors[3], width=2), name=plot_titles[3]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_BF'], mode='lines', line=dict(color=colors[4], width=2), name=plot_titles[4]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Steps'], mode='lines', line=dict(color=colors[5], width=2), name=plot_titles[5]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Steps'], mode='lines', line=dict(color=colors[6], width=2), name=plot_titles[6]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories Consumed'], mode='lines', line=dict(color=colors[7], width=2), name=plot_titles[7]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'], mode='lines', line=dict(color=colors[8], width=2), name=plot_titles[8]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories from Exercise'], mode='lines', line=dict(color=colors[9], width=2), name=plot_titles[9]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Activity_Calories'], mode='lines', line=dict(color=colors[10], width=2), name=plot_titles[10]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Deficit'], mode='lines', line=dict(color=colors[11], width=2), name=plot_titles[11]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Deficit'], mode='lines', line=dict(color=colors[12], width=2), name=plot_titles[12]),
-    go.Scatter(x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'], mode='lines', line=dict(color=colors[13], width=2), name=plot_titles[13]),
+# Create subplot grid: 4 rows x 2 cols → 8 plots
+fig = make_subplots(rows=4, cols=2, subplot_titles=plot_titles)
+
+# Add paired line plots
+paired_plots = [
+    ('Weight', '7Day_Rolling_Weight'),
+    ('BF%', '7Day_Rolling_BF'),
+    ('Steps', '7Day_Rolling_Steps'),
+    ('Calories Consumed', '7Day_Rolling_Consumed_Calories'),
+    ('Calories from Exercise', '7Day_Rolling_Activity_Calories'),
+    ('Deficit', '7Day_Rolling_Deficit'),
 ]
 
-# Add traces to subplot grid
-for i, trace in enumerate(plots):
-    row = (i // 4) + 1
-    col = (i % 4) + 1
-    fig.add_trace(trace, row=row, col=col)
+for i, (raw, rolling) in enumerate(paired_plots):
+    row = (i // 2) + 1
+    col = (i % 2) + 1
+    # Raw line
+    fig.add_trace(
+        go.Scatter(
+            x=df_filtered['Date'], y=df_filtered[raw],
+            mode='lines', line=dict(color=colors[i], width=2),
+            name=raw
+        ),
+        row=row, col=col
+    )
+    # Rolling line
+    fig.add_trace(
+        go.Scatter(
+            x=df_filtered['Date'], y=df_filtered[rolling],
+            mode='lines', line=dict(color=colors[i], width=3, dash='dash'),
+            name=f"{rolling} (7D)"
+        ),
+        row=row, col=col
+    )
 
-# Global layout for taller plots and black text
-fig.update_layout(
-    showlegend=False,
-    height=1200,  # taller plots
-    margin=dict(l=5, r=5, t=30, b=5),
-    plot_bgcolor="white",
-    paper_bgcolor="white",
-    font=dict(color="black")  # all text (titles, annotations, labels) in black
+# 7-Day Rolling Weight Change as bar with y=0 line
+fig.add_trace(
+    go.Bar(
+        x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight_Change'],
+        marker_color=colors[6], name='7D Rolling Weight Change'
+    ),
+    row=3, col=2
+)
+fig.add_hline(y=0, line_dash="dash", line_color="black", row=3, col=2)
+
+# Cumulative Deficit
+fig.add_trace(
+    go.Scatter(
+        x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'],
+        mode='lines', line=dict(color=colors[7], width=2),
+        name='Cumulative Deficit'
+    ),
+    row=4, col=2
 )
 
-# Remove ticks, labels, and grids for compactness
-fig.update_xaxes(showticklabels=False, zeroline=False, showgrid=False)
-fig.update_yaxes(showticklabels=False, zeroline=False, showgrid=False)
+# Global layout
+fig.update_layout(
+    height=1600,  # make taller for readability
+    showlegend=True,
+    plot_bgcolor='white',
+    paper_bgcolor='white',
+    font=dict(color='black')
+)
+
+# Remove ticks and grids for compact look
+fig.update_xaxes(showticklabels=False, zeroline=False)
+fig.update_yaxes(showticklabels=False, zeroline=False)
 
 # Render in Streamlit
 st.plotly_chart(fig, use_container_width=True)
