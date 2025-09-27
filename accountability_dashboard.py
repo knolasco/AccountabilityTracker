@@ -173,29 +173,35 @@ df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
 
 # st.pyplot(fig_cal)
 
+# ====================
+# 📊 PLOTTING SECTION
+# ====================
+
 # ⚖️ Body Weight Trend
 st.subheader("⚖️ Body Weight Trend")
 fig1 = go.Figure()
-fig1.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Weight'],
-                          mode='lines+markers', name='Daily Weight', line=dict(color='gray')))
-fig1.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight'],
-                          mode='lines', name='7-Day Avg', line=dict(color='blue', width=3)))
+fig1.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['Weight'],
+    mode='lines+markers', name='Daily Weight',
+    line=dict(color='gray', width=1), marker=dict(size=3)
+))
+fig1.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight'],
+    mode='lines', name='7-Day Avg',
+    line=dict(color='blue', width=2)
+))
 fig1.update_layout(
-    xaxis_title='Date',
-    yaxis_title='Weight (lbs)',
-    xaxis_tickangle=-45,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    legend=dict(font=dict(color='black'))  # <-- Add this line
+    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    legend=dict(font=dict(size=8), orientation="h", y=-0.2)
 )
 st.plotly_chart(fig1, use_container_width=True)
 
+
 # 📈 Rate of Change of 7-Day Rolling Weight
 st.subheader("📈 Rate of Change – 7-Day Rolling Avg Weight")
-
 fig_change = go.Figure()
 fig_change.add_trace(go.Bar(
     x=df_filtered['Date'],
@@ -205,14 +211,11 @@ fig_change.add_trace(go.Bar(
 ))
 fig_change.add_hline(y=0, line_dash="dash", line_color="black")
 fig_change.update_layout(
-    xaxis_title='Date',
-    yaxis_title='Change in 7-Day Avg Weight (lbs)',
-    xaxis_tickangle=-45,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    legend=dict(font=dict(size=8), orientation="h", y=-0.2)
 )
 st.plotly_chart(fig_change, use_container_width=True)
 
@@ -220,49 +223,45 @@ st.plotly_chart(fig_change, use_container_width=True)
 # 💪 Body Fat % Trend
 st.subheader("💪 Body Fat % Trend")
 fig2 = go.Figure()
-fig2.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['BF%'],
-                          mode='lines+markers', name='Daily BF%', line=dict(color='violet')))
-fig2.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_BF'],
-                          mode='lines', name='7-Day Avg', line=dict(color='purple', width=3)))
+fig2.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['BF%'],
+    mode='lines+markers', name='Daily BF%',
+    line=dict(color='violet', width=1), marker=dict(size=3)
+))
+fig2.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['7Day_Rolling_BF'],
+    mode='lines', name='7-Day Avg',
+    line=dict(color='purple', width=2)
+))
 fig2.update_layout(
-    xaxis_title='Date',
-    yaxis_title='Body Fat %',
-    xaxis_tickangle=-45,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    legend=dict(font=dict(color='black'))  # <-- Add this line
+    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    legend=dict(font=dict(size=8), orientation="h", y=-0.2)
 )
 st.plotly_chart(fig2, use_container_width=True)
 
-# ====================
-# ⚖️ Estimated vs Actual Weight Lost
-# ====================
-st.subheader("⚖️ Estimated vs Actual Weight Lost")
 
-# Calculate estimated weight lost from deficits
+# ⚖️ Estimated vs Actual Weight Lost
+st.subheader("⚖️ Estimated vs Actual Weight Lost")
 estimated_weight_lost = df_filtered['Deficit'].sum() / 3500 if len(df_filtered) > 0 else 0
 actual_weight_lost = df_filtered['Weight'].iloc[0] - df_filtered['7Day_Rolling_Weight'].iloc[-1] if len(df_filtered) > 0 else 0
 
 fig_weight_compare = go.Figure()
 fig_weight_compare.add_trace(go.Bar(
-    x=['Estimated (from Deficit)', 'Actual (Scale)'],
+    x=['Estimated', 'Actual'],
     y=[estimated_weight_lost, actual_weight_lost],
     marker_color=['#636EFA', '#EF553B'],
-    text=[f"{estimated_weight_lost:.2f} lbs", f"{actual_weight_lost:.2f} lbs"],
+    text=[f"{estimated_weight_lost:.1f}", f"{actual_weight_lost:.1f}"],
     textposition='auto'
 ))
 fig_weight_compare.update_layout(
-    yaxis_title='Weight Lost (lbs)',
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    showlegend=False,
-    title="Estimated vs Actual Weight Lost"
+    xaxis=dict(showticklabels=True, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    showlegend=False
 )
 st.plotly_chart(fig_weight_compare, use_container_width=True)
 
@@ -270,145 +269,111 @@ st.plotly_chart(fig_weight_compare, use_container_width=True)
 # 👣 Daily Steps
 st.subheader("👣 Daily Steps")
 fig3 = go.Figure()
-fig3.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Steps'],
-                          mode='lines+markers', name='Daily Steps', line=dict(color='#4e79a7')))
-fig3.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Steps'],
-                          mode='lines', name='7-Day Avg', line=dict(color='#f28e2c', width=3)))
-fig3.add_hline(y=10000, line_dash="dash", line_color="orange", annotation_text="Goal: 10,000", annotation_position="top left")
+fig3.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['Steps'],
+    mode='lines+markers', name='Daily Steps',
+    line=dict(color='#4e79a7', width=1), marker=dict(size=3)
+))
+fig3.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Steps'],
+    mode='lines', name='7-Day Avg',
+    line=dict(color='#f28e2c', width=2)
+))
+fig3.add_hline(y=10000, line_dash="dash", line_color="orange")
 fig3.update_layout(
-    xaxis_title='Date',
-    yaxis_title='Steps',
-    xaxis_tickangle=-45,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    legend=dict(font=dict(color='black'))  
-
+    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    legend=dict(font=dict(size=8), orientation="h", y=-0.2)
 )
 st.plotly_chart(fig3, use_container_width=True)
+
 
 # 🔥 Daily Calories Consumed
 st.subheader("🔥 Daily Calories Consumed")
 fig4 = go.Figure()
-fig4.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories Consumed'],
-                          mode='lines+markers', name='Daily Consumed Calories', line=dict(color='#76b7b2')))
-fig4.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'],
-                          mode='lines', name='7-Day Avg', line=dict(color='#e15759', width=3)))
+fig4.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['Calories Consumed'],
+    mode='lines+markers', name='Daily Consumed',
+    line=dict(color='#76b7b2', width=1), marker=dict(size=3)
+))
+fig4.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Consumed_Calories'],
+    mode='lines', name='7-Day Avg',
+    line=dict(color='#e15759', width=2)
+))
 fig4.update_layout(
-    xaxis_title='Date',
-    yaxis_title='Calories',
-    xaxis_tickangle=-45,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    legend=dict(font=dict(color='black')) 
+    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    legend=dict(font=dict(size=8), orientation="h", y=-0.2)
 )
 st.plotly_chart(fig4, use_container_width=True)
+
 
 # 🏃 Daily Calories from Exercise
 st.subheader("🏃 Daily Calories from Exercise")
 fig5 = go.Figure()
-fig5.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Calories from Exercise'],
-                          mode='lines+markers', name='Daily Burned Calories', line=dict(color='#59a14f')))
-fig5.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Activity_Calories'],
-                          mode='lines', name='7-Day Avg', line=dict(color='#edc949', width=3)))
+fig5.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['Calories from Exercise'],
+    mode='lines+markers', name='Daily Exercise',
+    line=dict(color='#59a14f', width=1), marker=dict(size=3)
+))
+fig5.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Activity_Calories'],
+    mode='lines', name='7-Day Avg',
+    line=dict(color='#edc949', width=2)
+))
 fig5.update_layout(
-    xaxis_title='Date',
-    yaxis_title='Calories Burned',
-    xaxis_tickangle=-45,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    legend=dict(font=dict(color='black')) 
+    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    legend=dict(font=dict(size=8), orientation="h", y=-0.2)
 )
 st.plotly_chart(fig5, use_container_width=True)
+
 
 # 📉 Daily Caloric Deficit
 st.subheader("📉 Daily Caloric Deficit")
 fig6 = go.Figure()
-fig6.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Deficit'],
-                          mode='lines+markers', name='Deficit', line=dict(color='#af7aa1')))
-fig6.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Deficit'],
-                          mode='lines+markers', name='7-Day Avg', line=dict(color='#ff9da7', width=3)))
-fig6.add_hline(y=0, line_dash="dash", line_color="red", annotation_text="No Deficit", annotation_position="top left")
+fig6.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['Deficit'],
+    mode='lines+markers', name='Deficit',
+    line=dict(color='#af7aa1', width=1), marker=dict(size=3)
+))
+fig6.add_trace(go.Scatter(
+    x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Deficit'],
+    mode='lines', name='7-Day Avg',
+    line=dict(color='#ff9da7', width=2)
+))
+fig6.add_hline(y=0, line_dash="dash", line_color="red")
 fig6.update_layout(
-    xaxis_title='Date',
-    yaxis_title='Deficit (kcal)',
-    xaxis_tickangle=-45,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    legend=dict(font=dict(color='black')) 
+    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    legend=dict(font=dict(size=8), orientation="h", y=-0.2)
 )
 st.plotly_chart(fig6, use_container_width=True)
 
+
 # 📊 Cumulative Caloric Deficit
 st.subheader("📊 Cumulative Caloric Deficit")
-
 fig_cum_deficit = go.Figure()
 fig_cum_deficit.add_trace(go.Scatter(
-    x=df_filtered['Date'],
-    y=df_filtered['Cumulative_Deficit'],
-    mode='lines',
-    name='Cumulative Deficit',
-    line=dict(color='blue', width=3)
+    x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'],
+    mode='lines', name='Cumulative Deficit',
+    line=dict(color='blue', width=2)
 ))
-fig_cum_deficit.add_hline(
-    y=0,
-    line_dash="dash",
-    line_color="red",
-    annotation_text="No Net Deficit",
-    annotation_position="top left"
-)
+fig_cum_deficit.add_hline(y=0, line_dash="dash", line_color="red")
 fig_cum_deficit.update_layout(
-    xaxis_title='Date',
-    yaxis_title='Cumulative Deficit (kcal)',
-    xaxis_tickangle=-45,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    font=dict(color='black'),
-    xaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black')),
-    yaxis=dict(color='black', title_font=dict(color='black'), tickfont=dict(color='black'))
+    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+    plot_bgcolor='white', paper_bgcolor='white',
+    margin=dict(l=10, r=10, t=25, b=10),
+    legend=dict(font=dict(size=8), orientation="h", y=-0.2)
 )
 st.plotly_chart(fig_cum_deficit, use_container_width=True)
-
-
-
-# # ====================
-# # 📈 Correlation Matrix
-# # ====================
-# import seaborn as sns
-
-# st.subheader("📊 Correlation Between Metrics")
-
-# # Select numeric features for correlation
-# corr_cols = [
-#     'Calories Consumed',
-#     'Calories from Exercise',
-#     'Deficit',
-#     'Weight',
-#     'BF%',
-#     'Protein > 130',
-#     'Exercise Minutes',
-#     'Steps'
-# ]
-
-# # Clean and compute correlations
-# corr_data = df_filtered[corr_cols].copy()
-# corr_data['Protein > 130'] = corr_data['Protein > 130'].astype(int)
-# corr_matrix = corr_data.corr()
-
-# # Plot heatmap
-# fig_corr, ax_corr = plt.subplots(figsize=(8, 6))
-# sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, fmt=".2f", ax=ax_corr)
-# ax_corr.set_title("Correlation Matrix")
-# fig_corr.tight_layout()
-# st.pyplot(fig_corr)
