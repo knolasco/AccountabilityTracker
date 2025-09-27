@@ -257,12 +257,15 @@ fig.update_layout(
     showlegend=True,
     plot_bgcolor='white',
     paper_bgcolor='white',
-    font=dict(color='black')
+    font=dict(color='black'),  # global font color
+    legend=dict(font=dict(color='black'))  # legend text color
 )
 
-# Remove ticks and grids for compact look
+# Make Y-axis values visible and black
+fig.update_yaxes(showticklabels=True, zeroline=False, tickfont=dict(color='black'))
+
+# Optional: X-axis can remain hidden if you want compact view
 fig.update_xaxes(showticklabels=False, zeroline=False)
-fig.update_yaxes(showticklabels=False, zeroline=False)
 
 # Render in Streamlit
 st.plotly_chart(fig, use_container_width=True)
