@@ -9,6 +9,9 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from plotly.subplots import make_subplots
 
+st.set_page_config(layout="wide")
+
+
 # Define scope for Google Sheets and Google Drive access
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
