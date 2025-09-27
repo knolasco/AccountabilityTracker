@@ -198,15 +198,6 @@ fig_weight_compare.update_layout(
 )
 st.plotly_chart(fig_weight_compare, use_container_width=True)
 
-# Create subplot grid: 12 plots total → 2 rows x 4 cols
-fig = make_subplots(rows=4, cols=4)
-
-# Define colors for each plot
-colors = [
-    "blue", "red", "green", "purple",
-    "orange", "brown", "teal", "magenta"
-]
-
 # Short titles for each plot
 plot_titles = [
     "Weight",
@@ -224,6 +215,11 @@ plot_titles = [
     "7D Rolling Deficit",
     "Cumulative Deficit"
 ]
+
+# Create subplot grid: 12 plots total → 2 rows x 4 cols
+fig = make_subplots(rows=4, cols=4, subplot_titles = plot_titles)
+
+
 
 # Define a color palette with enough distinct colors using the requested hex codes
 colors = [
@@ -268,8 +264,8 @@ fig.update_layout(
 )
 
 # Remove ticks, labels, and grids for compactness
-fig.update_xaxes(showticklabels=False, title=None, showgrid=False, zeroline=False)
-fig.update_yaxes(showticklabels=False, title=None, showgrid=False, zeroline=False)
+fig.update_xaxes(showticklabels=False, zeroline=False)
+fig.update_yaxes(showticklabels=False, zeroline=False)
 
 # Render in Streamlit
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig)
