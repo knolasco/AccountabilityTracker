@@ -181,8 +181,14 @@ df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
 #     showlegend=False
 # )
 # st.plotly_chart(fig_weight_compare, use_container_width=True)
+# Colors for each subplot pair
+colors = [
+    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728",
+    "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"
+]
 
 # ====================
+# Short titles for each subplot
 # Short titles for each subplot
 plot_titles = [
     "Weight", "BF%", "Steps",
@@ -190,10 +196,24 @@ plot_titles = [
     "7-Day Rolling Weight Change", "Cumulative Deficit"
 ]
 
-# Colors for each subplot pair
-colors = [
-    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728",
-    "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"
+# Dark colors for raw metrics
+dark_colors = [
+    "#1f77b4",  # blue
+    "#ff7f0e",  # orange
+    "#2ca02c",  # green
+    "#d62728",  # red
+    "#9467bd",  # purple
+    "#8c564b",  # brown
+]
+
+# Lighter versions for 7-day rolling metrics
+light_colors = [
+    "#aec7e8",  # light blue
+    "#ffbb78",  # light orange
+    "#98df8a",  # light green
+    "#ff9896",  # light red
+    "#c5b0d5",  # light purple
+    "#c49c94",  # light brown
 ]
 
 # Create subplot grid: 4 rows x 2 cols → 8 plots
@@ -213,23 +233,24 @@ paired_plots = [
 for i, (raw, rolling) in enumerate(paired_plots[:6]):
     row = (i // 2) + 1
     col = (i % 2) + 1
+    # Raw metric → dark color
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[raw],
-            mode='lines', line=dict(color=colors[i], width=2),
+            mode='lines', line=dict(color=dark_colors[i], width=2),
             name=raw, showlegend=False
         ),
         row=row, col=col
     )
+    # Rolling metric → light color
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[rolling],
-            mode='lines', line=dict(color=colors[i], width=3, dash='dash'),
+            mode='lines', line=dict(color=light_colors[i], width=3, dash='dash'),
             name=f"{rolling} (7D)", showlegend=False
         ),
         row=row, col=col
     )
-
 # 7-Day Rolling Weight Change (full row)
 fig.add_trace(
     go.Bar(
