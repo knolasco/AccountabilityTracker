@@ -233,20 +233,20 @@ paired_plots = [
 for i, (raw, rolling) in enumerate(paired_plots[:6]):
     row = (i // 2) + 1
     col = (i % 2) + 1
-    # Raw metric → dark color
+    # Raw metric → light color
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[raw],
-            mode='lines', line=dict(color=dark_colors[i], width=2),
+            mode='lines', line=dict(color=light_colors[i], width=2),
             name=raw, showlegend=False
         ),
         row=row, col=col
     )
-    # Rolling metric → light color
+    # Rolling metric → dark color
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[rolling],
-            mode='lines', line=dict(color=light_colors[i], width=3, dash='dash'),
+            mode='lines', line=dict(color=dark_colors[i], width=3, dash='dash'),
             name=f"{rolling} (7D)", showlegend=False
         ),
         row=row, col=col
