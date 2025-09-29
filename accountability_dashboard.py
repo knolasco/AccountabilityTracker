@@ -53,6 +53,9 @@ df['7Day_Rolling_Weight_Change'] = df['7Day_Rolling_Weight'].diff()
 # Cumulative deficit over time
 df['Cumulative_Deficit'] = df['Deficit'].cumsum()
 
+# weight lost from deficit
+df['Weight_Lost_From_Deficit'] = df['Cumulative_Deficit'] / 3500
+
 
 # Sidebar filters
 st.sidebar.title("📅 Filters")
@@ -78,10 +81,10 @@ starting_bf = df_filtered['BF%'].iloc[0]
 latest_avg_bf = df_filtered['7Day_Rolling_BF'].iloc[-1]
 bf_lost = starting_bf - latest_avg_bf
 
-avg_calories = df_filtered['Calories Consumed'].mean()
-avg_deficit = df_filtered['Deficit'].mean()
-avg_steps = df_filtered['Steps'].mean()
-avg_exercise_cal = df_filtered['Calories from Exercise'].mean()
+avg_calories = df_filtered['7Day_Rolling_Consumed_Calories'].iloc[-1]
+avg_deficit = df_filtered['7Day_Rolling_Deficit'].iloc[-1]
+avg_steps = df_filtered['7Day_Rolling_Steps'].iloc[-1]
+avg_exercise_cal = df_filtered['7Day_Rolling_Activity_Calories'].iloc[-1]
 
 # Compute streaks
 def compute_streaks(series):
@@ -111,12 +114,13 @@ for met in df_streak.sort_index(ascending=False)['All_Goals_Met']:
 # Adaptive layout: define metrics in rows of 4 for smaller screens
 metrics = [
     ("✅ Days All Goals Met", f"{goal_days}/{total_days} ({percent:.1f}%)"),
-    ("⚖️ Weight Lost", f"{weight_lost:.1f} lbs"),
+    ("⚖️ Weight  (Observed)", f"{weight_lost:.1f} lbs"),
+    ("⚖️ Weight Lost (Deficit)", f"{df_filtered['Weight_Lost_From_Deficit'].iloc[-1]:.1f} lbs"),
     ("💪 Body Fat % Lost", f"{bf_lost:.1f}%"),
-    ("🔥 Avg Calories Consumed", f"{avg_calories:.0f} kcal"),
-    ("📉 Avg Daily Deficit", f"{avg_deficit:.0f} kcal"),
-    ("👣 Avg Daily Steps", f"{avg_steps:.0f}"),
-    ("🏃 Avg Exercise Calories", f"{avg_exercise_cal:.0f} kcal"),
+    ("🔥 RL7 Calories Consumed", f"{avg_calories:.0f} kcal"),
+    ("📉 RL7 Daily Deficit", f"{avg_deficit:.0f} kcal"),
+    ("👣 RL7 Daily Steps", f"{avg_steps:.0f}"),
+    ("🏃 RL7 Exercise Calories", f"{avg_exercise_cal:.0f} kcal"),
     ("🔥 Longest Streak", f"{longest_streak} days"),
     ("🔥 Current Streak", f"{current_streak} days")
 ]
@@ -131,7 +135,7 @@ for i in range(0, len(metrics), cols_per_row):
 # ====================
 # 📅 Calendar View of Goal Completion (Current Month Only)
 # ====================
-st.subheader("📅 Goal Completion Calendar (Current Month)")
+st.subheader("📅 Metrics over time")
 
 # Convert Date to datetime (just in case)
 df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
