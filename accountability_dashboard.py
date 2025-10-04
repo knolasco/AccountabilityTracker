@@ -56,6 +56,9 @@ df['Cumulative_Deficit'] = df['Deficit'].cumsum()
 # weight lost from deficit
 df['Weight_Lost_From_Deficit'] = df['Cumulative_Deficit'] / 3500
 
+# average weight lost per week
+df['Avg_Weight_Lost_Per_Week'] = df['Weight_Lost_From_Deficit'] / (len(df) / 7)
+
 
 # Sidebar filters
 st.sidebar.title("📅 Filters")
@@ -116,6 +119,7 @@ metrics = [
     ("✅ Days All Goals Met", f"{goal_days}/{total_days} ({percent:.1f}%)"),
     ("⚖️ Weight  (Observed)", f"{weight_lost:.1f} lbs"),
     ("⚖️ Weight Lost (Deficit)", f"{df_filtered['Weight_Lost_From_Deficit'].iloc[-1]:.1f} lbs"),
+    ("📅 Avg Weight Lost/Week", f"{df_filtered['Avg_Weight_Lost_Per_Week'].iloc[-1]:.2f} lbs"),
     ("💪 Body Fat % Lost", f"{bf_lost:.1f}%"),
     ("🔥 RL7 Calories Consumed", f"{avg_calories:.0f} kcal"),
     ("📉 RL7 Daily Deficit", f"{avg_deficit:.0f} kcal"),
