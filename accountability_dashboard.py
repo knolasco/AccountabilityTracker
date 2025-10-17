@@ -9,8 +9,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from plotly.subplots import make_subplots
 
-# st.set_page_config(layout="wide")
-
 
 # Define scope for Google Sheets and Google Drive access
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -144,51 +142,6 @@ st.subheader("📅 Metrics over time")
 # Convert Date to datetime (just in case)
 df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
 
-# # Get current month and year
-# today = pd.Timestamp.today()
-# current_month_data = df_filtered[
-#     (df_filtered['Date'].dt.month == today.month) &
-#     (df_filtered['Date'].dt.year == today.year)
-# ]
-
-# # Use 1 for goal met, 0 for not met
-# calendar_data = current_month_data.set_index('Date')['All_Goals_Met'].astype(int)
-
-# # Generate calendar heatmap
-# fig_cal, ax_cal = calplot.calplot(
-#     calendar_data,
-#     how='sum',
-#     cmap='OrRd',
-#     figsize=(12, 3.5),
-#     colorbar=True,
-#     suptitle='Days All Goals Met – This Month',
-# )
-
-# st.pyplot(fig_cal)
-
-
-# # === PLOTTING SECTION ===
-# # ⚖️ Estimated vs Actual Weight Lost
-# st.subheader("⚖️ Estimated vs Actual Weight Lost")
-# estimated_weight_lost = df_filtered['Deficit'].sum() / 3500 if len(df_filtered) > 0 else 0
-# actual_weight_lost = df_filtered['Weight'].iloc[0] - df_filtered['7Day_Rolling_Weight'].iloc[-1] if len(df_filtered) > 0 else 0
-
-# fig_weight_compare = go.Figure()
-# fig_weight_compare.add_trace(go.Bar(
-#     x=['Estimated', 'Actual'],
-#     y=[estimated_weight_lost, actual_weight_lost],
-#     marker_color=['#636EFA', '#EF553B'],
-#     text=[f"{estimated_weight_lost:.1f}", f"{actual_weight_lost:.1f}"],
-#     textposition='auto'
-# ))
-# fig_weight_compare.update_layout(
-#     xaxis=dict(showticklabels=True, showgrid=False, zeroline=False),
-#     yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
-#     plot_bgcolor='white', paper_bgcolor='white',
-#     margin=dict(l=10, r=10, t=25, b=10),
-#     showlegend=False
-# )
-# st.plotly_chart(fig_weight_compare, use_container_width=True)
 # Colors for each subplot pair
 colors = [
     "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728",
@@ -287,6 +240,10 @@ fig.update_layout(
     paper_bgcolor='white',
     font=dict(color='black')
 )
+
+# Remove gridlines on all axes
+fig.update_xaxes(showgrid=False, zeroline=False)
+fig.update_yaxes(showgrid=False, zeroline=False)
 
 # Make Y-axis values visible and black
 fig.update_yaxes(showticklabels=True, zeroline=False, tickfont=dict(color='black'))
