@@ -58,7 +58,7 @@ df['Weight_Lost_From_Deficit'] = df['Cumulative_Deficit'] / 3500
 df['Avg_Weight_Lost_Per_Week'] = df['Weight_Lost_From_Deficit'] / (len(df) / 7)
 
 # 7 day rolling average of weight lost per week
-df['7Day_Rolling_Avg_Weight_Lost_Per_Week'] = df['Avg_Weight_Lost_Per_Week'].rolling(window=7, min_periods=1).mean()
+df['7Day_Rolling_Avg_Weight_Lost_Per_Week'] = df['Deficit'].rolling(window=7, min_periods=1).sum() / 3500 / 1
 
 
 # Sidebar filters
