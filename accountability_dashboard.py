@@ -177,7 +177,7 @@ plot_titles = [
     "Deficit",
     "7-Day Rolling Weight Change",
     "Cumulative Deficit",
-    ""
+    "Deficit vs. 7-Day Rolling Weight Change"
 ]
 
 # Create 5 rows × 2 columns (10 total plots)
