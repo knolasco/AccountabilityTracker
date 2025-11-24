@@ -218,7 +218,7 @@ fig.add_trace(
         marker_color="#e377c2",
         showlegend=False
     ),
-    row=5, col=1
+    row=4, col=2
 )
 fig.add_hline(y=0, line_dash="dash", line_color="black", row=5, col=1)
 
@@ -231,7 +231,7 @@ fig.add_trace(
         line=dict(color="#7f7f7f", width=2),
         showlegend=False
     ),
-    row=5, col=2
+    row=5, col=1
 )
 
 # Global styling
