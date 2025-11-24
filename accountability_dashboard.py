@@ -239,6 +239,22 @@ fig.add_trace(
     row=5, col=1
 )
 
+# Scatter plot inside subplot row 5, col 2
+fig.add_trace(
+    go.Scatter(
+        x=df_filtered['Deficit'],
+        y=df_filtered['7Day_Rolling_Weight_Change'],
+        mode='markers',
+        marker=dict(size=6, color="#1f77b4", opacity=0.7),
+        showlegend=False
+    ),
+    row=5, col=2
+)
+
+fig.update_xaxes(title_text="Daily Deficit (kcal)", row=5, col=2)
+fig.update_yaxes(title_text="RL7 Weight Change (lbs/day)", row=5, col=2)
+
+
 # Global styling
 fig.update_layout(
     height=2000,
