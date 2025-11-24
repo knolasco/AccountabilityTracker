@@ -44,6 +44,8 @@ df['7Day_Rolling_Deficit'] = df['Deficit'].rolling(window = 7, min_periods=1).me
 df['7Day_Rolling_Steps'] = df['Steps'].rolling(window = 7, min_periods = 1).mean()
 df['7Day_Rolling_Activity_Calories'] = df['Calories from Exercise'].rolling(window = 7, min_periods=1).mean()
 df['7Day_Rolling_Consumed_Calories'] = df['Calories Consumed'].rolling(window = 7, min_periods=1).mean()
+df['7Day_Rolling_Muscle'] = df['Muscle Mass'].rolling(window=7, min_periods=1).mean()
+
 
 # Rate of change (day-to-day difference) of 7-day rolling average weight
 df['7Day_Rolling_Weight_Change'] = df['7Day_Rolling_Weight'].diff()
@@ -122,6 +124,7 @@ metrics = [
     ("⚖️ Weight Lost (Deficit)", f"{df_filtered['Weight_Lost_From_Deficit'].iloc[-1]:.1f} lbs"),
     ("📅 RL7 Weight Lost/Week", f"{df_filtered['7Day_Rolling_Avg_Weight_Lost_Per_Week'].iloc[-1]:.2f} lbs"),
     ("💪 Body Fat % Lost", f"{bf_lost:.1f}%"),
+    ("💪 RL7 Muscle Mass", f"{df_filtered['7Day_Rolling_Muscle'].iloc[-1]:.1f} lbs"),
     ("🔥 RL7 Calories Consumed", f"{avg_calories:.0f} kcal"),
     ("📉 RL7 Daily Deficit", f"{avg_deficit:.0f} kcal"),
     ("👣 RL7 Daily Steps", f"{avg_steps:.0f}"),
@@ -137,53 +140,45 @@ for i in range(0, len(metrics), cols_per_row):
     for col, (title, value) in zip(cols, metrics[i:i+cols_per_row]):
         col.metric(title, value)
 
-# ====================
-# 📅 Calendar View of Goal Completion (Current Month Only)
-# ====================
+# ============================
+# 📊 UPDATED PLOTTING SECTION
+# ============================
+
 st.subheader("📅 Metrics over time")
 
-# Convert Date to datetime (just in case)
-df_filtered['Date'] = pd.to_datetime(df_filtered['Date'])
-
-# Colors for each subplot pair
-colors = [
-    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728",
-    "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"
-]
-
-# ====================
-# Short titles for each subplot
-# Short titles for each subplot
-plot_titles = [
-    "Weight", "BF%", "Steps",
-    "Calories Consumed", "Exercise Calories", "Deficit",
-    "7-Day Rolling Weight Change", "Cumulative Deficit"
-]
-
-# Dark colors for raw metrics
+# Colors
 dark_colors = [
-    "#1f77b4",  # blue
-    "#ff7f0e",  # orange
-    "#2ca02c",  # green
-    "#d62728",  # red
-    "#9467bd",  # purple
-    "#8c564b",  # brown
+    "#1f77b4",  # Weight
+    "#ff7f0e",  # BF%
+    "#2ca02c",  # Steps
+    "#d62728",  # Consumed
+    "#9467bd",  # Exercise
+    "#8c564b",  # Deficit
+    "#17becf"   # Muscle Mass (NEW)
 ]
 
-# Lighter versions for 7-day rolling metrics
 light_colors = [
-    "#aec7e8",  # light blue
-    "#ffbb78",  # light orange
-    "#98df8a",  # light green
-    "#ff9896",  # light red
-    "#c5b0d5",  # light purple
-    "#c49c94",  # light brown
+    "#aec7e8",
+    "#ffbb78",
+    "#98df8a",
+    "#ff9896",
+    "#c5b0d5",
+    "#c49c94",
+    "#9edae5"   # Muscle Mass (NEW)
 ]
 
-# Create subplot grid: 4 rows x 2 cols → 8 plots
-fig = make_subplots(rows=4, cols=2, subplot_titles=plot_titles)
+plot_titles = [
+    "Weight", "BF%",
+    "Steps", "Calories Consumed",
+    "Exercise Calories", "Deficit",
+    "Muscle Mass", "7-Day Rolling Weight Change",
+    "Cumulative Deficit", ""
+]
 
-# Add paired line plots
+# Create 5 rows × 2 columns (10 total plots)
+fig = make_subplots(rows=5, cols=2, subplot_titles=plot_titles)
+
+# Paired plots (raw + 7-day rolling)
 paired_plots = [
     ('Weight', '7Day_Rolling_Weight'),
     ('BF%', '7Day_Rolling_BF'),
@@ -191,66 +186,65 @@ paired_plots = [
     ('Calories Consumed', '7Day_Rolling_Consumed_Calories'),
     ('Calories from Exercise', '7Day_Rolling_Activity_Calories'),
     ('Deficit', '7Day_Rolling_Deficit'),
+    ('Muscle Mass', '7Day_Rolling_Muscle')  # NEW
 ]
 
-# Add the first 6 paired plots to first 3 rows
-for i, (raw, rolling) in enumerate(paired_plots[:6]):
+# Add paired line plots (rows 1–4)
+for i, (raw, rolling) in enumerate(paired_plots):
     row = (i // 2) + 1
     col = (i % 2) + 1
-    # Raw metric → light color
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[raw],
             mode='lines', line=dict(color=light_colors[i], width=2),
-            name=raw, showlegend=False
+            showlegend=False
         ),
         row=row, col=col
     )
-    # Rolling metric → dark color
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[rolling],
             mode='lines', line=dict(color=dark_colors[i], width=3, dash='dash'),
-            name=f"{rolling} (7D)", showlegend=False
+            showlegend=False
         ),
         row=row, col=col
     )
-# 7-Day Rolling Weight Change (full row)
+
+# 7-Day Rolling Weight Change (row 5, col 1)
 fig.add_trace(
     go.Bar(
-        x=df_filtered['Date'], y=df_filtered['7Day_Rolling_Weight_Change'],
-        marker_color=colors[6], name='7D Rolling Weight Change', showlegend=False
+        x=df_filtered['Date'],
+        y=df_filtered['7Day_Rolling_Weight_Change'],
+        marker_color="#e377c2",
+        showlegend=False
     ),
-    row=4, col=1
+    row=5, col=1
 )
-fig.add_hline(y=0, line_dash="dash", line_color="black", row=4, col=1)
+fig.add_hline(y=0, line_dash="dash", line_color="black", row=5, col=1)
 
-# Cumulative Deficit (last subplot)
+# Cumulative Deficit (row 5, col 2)
 fig.add_trace(
     go.Scatter(
-        x=df_filtered['Date'], y=df_filtered['Cumulative_Deficit'],
-        mode='lines', line=dict(color=colors[7], width=2),
-        name='Cumulative Deficit', showlegend=False
+        x=df_filtered['Date'],
+        y=df_filtered['Cumulative_Deficit'],
+        mode='lines',
+        line=dict(color="#7f7f7f", width=2),
+        showlegend=False
     ),
-    row=4, col=2
+    row=5, col=2
 )
 
-# Global layout
+# Global styling
 fig.update_layout(
-    height=1600,
+    height=2000,
     showlegend=False,
     plot_bgcolor='white',
     paper_bgcolor='white',
     font=dict(color='black')
 )
 
-# Remove gridlines on all axes
-fig.update_xaxes(showgrid=False, zeroline=False)
-fig.update_yaxes(showgrid=False, zeroline=False)
+# Axes cleanup
+fig.update_xaxes(showgrid=False, showticklabels=False, zeroline=False)
+fig.update_yaxes(showgrid=False, showticklabels=True, zeroline=False, tickfont=dict(color='black'))
 
-# Make Y-axis values visible and black
-fig.update_yaxes(showticklabels=True, zeroline=False, tickfont=dict(color='black'))
-fig.update_xaxes(showticklabels=False, zeroline=False)
-
-# Render in Streamlit
 st.plotly_chart(fig, use_container_width=True)
