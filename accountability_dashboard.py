@@ -250,6 +250,21 @@ fig.add_trace(
     ),
     row=5, col=2
 )
+# Horizontal line at y = 0
+fig.add_hline(
+    y=0,
+    line_dash="dash",
+    line_color="black",
+    row=5, col=2
+)
+
+# Vertical line at x = 0
+fig.add_vline(
+    x=0,
+    line_dash="dash",
+    line_color="black",
+    row=5, col=2
+)
 
 fig.update_xaxes(title_text="Daily Deficit (kcal)", row=5, col=2)
 fig.update_yaxes(title_text="RL7 Weight Change (lbs/day)", row=5, col=2)
