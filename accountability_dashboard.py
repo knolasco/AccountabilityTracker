@@ -182,11 +182,11 @@ fig = make_subplots(rows=5, cols=2, subplot_titles=plot_titles)
 paired_plots = [
     ('Weight', '7Day_Rolling_Weight'),
     ('BF%', '7Day_Rolling_BF'),
+    ('Muscle Mass', '7Day_Rolling_Muscle'),
     ('Steps', '7Day_Rolling_Steps'),
     ('Calories Consumed', '7Day_Rolling_Consumed_Calories'),
     ('Calories from Exercise', '7Day_Rolling_Activity_Calories'),
-    ('Deficit', '7Day_Rolling_Deficit'),
-    ('Muscle Mass', '7Day_Rolling_Muscle')  # NEW
+    ('Deficit', '7Day_Rolling_Deficit')
 ]
 
 # Add paired line plots (rows 1–4)
