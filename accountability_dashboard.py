@@ -168,11 +168,17 @@ light_colors = [
 ]
 
 plot_titles = [
-    "Weight", "BF%",
-    "Steps", "Calories Consumed",
-    "Exercise Calories", "Deficit",
-    "Muscle Mass", "7-Day Rolling Weight Change",
-    "Cumulative Deficit", ""
+    "Weight", 
+    "BF%",
+    "Muscle Mass",
+    "Steps", 
+    "Calories Consumed",
+    "Exercise Calories", 
+    "Deficit",
+    "Muscle Mass", 
+    "7-Day Rolling Weight Change",
+    "Cumulative Deficit",
+    ""
 ]
 
 # Create 5 rows × 2 columns (10 total plots)
