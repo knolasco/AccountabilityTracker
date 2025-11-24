@@ -175,7 +175,6 @@ plot_titles = [
     "Calories Consumed",
     "Exercise Calories", 
     "Deficit",
-    "Muscle Mass", 
     "7-Day Rolling Weight Change",
     "Cumulative Deficit",
     ""
