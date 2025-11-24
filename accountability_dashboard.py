@@ -242,7 +242,7 @@ fig.add_trace(
 # Scatter plot inside subplot row 5, col 2
 fig.add_trace(
     go.Scatter(
-        x=df_filtered['Deficit'],
+        x=df_filtered['7Day_Rolling_Deficit'],
         y=df_filtered['7Day_Rolling_Weight_Change'],
         mode='markers',
         marker=dict(size=6, color="#1f77b4", opacity=0.7),
