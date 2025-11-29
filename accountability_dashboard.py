@@ -32,7 +32,7 @@ df['Date'] = pd.to_datetime(df['Date'])
 df.sort_values('Date', inplace=True)
 
 # Compute goal columns
-df['Deficit'] = df['Calories from Exercise'] + 1930 - df['Calories Consumed']
+df['Deficit'] = df['Calories from Exercise'] - df['Calories Consumed']
 df['Goal_Deficit'] = df['Deficit'] > 0
 # df['Goal_Steps'] = df['Steps'] > 10000
 df['All_Goals_Met'] = df['Goal_Deficit'] & df['Protein > 130']
