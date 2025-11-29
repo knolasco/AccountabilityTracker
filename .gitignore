@@ -9,3 +9,8 @@ env/
 
 # Ignore Streamlit config folder
 .streamlit/
+
+# ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# ignore jupyter notebooks
+*.ipynb
