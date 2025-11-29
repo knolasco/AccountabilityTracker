@@ -138,7 +138,9 @@ metrics = [
     ("🏃 RL7 Exercise Calories", f"{avg_exercise_cal:.0f} kcal"),
     ("🔥 Longest Streak", f"{longest_streak} days"),
     ("🔥 Current Streak", f"{current_streak} days"),
-    ("⚖️ Lowest Weight", f"{lowest_weight:.1f} lbs on {lowest_weight_date.date()}")
+    ("⚖️ Lowest Weight", f"{lowest_weight:.1f} lbs"),
+    ("📅 Date of Lowest Weight", f"{lowest_weight_date.date()}"),
+    (("Days Since Lowest Weight"), f"{(df_filtered['Date'].iloc[-1] - lowest_weight_date).days} days")
 ]
 
 # Display metrics in rows of 4
