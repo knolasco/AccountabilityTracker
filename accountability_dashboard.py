@@ -87,6 +87,11 @@ starting_bf = df_filtered['BF%'].iloc[0]
 latest_avg_bf = df_filtered['7Day_Rolling_BF'].iloc[-1]
 bf_lost = starting_bf - latest_avg_bf
 
+# last time my weight was the lowest
+df_filtered_sorted = df_filtered.sort_values('Weight')
+lowest_weight_date = df_filtered_sorted['Date'].iloc[0]
+lowest_weight = df_filtered_sorted['Weight'].iloc[0]
+
 avg_calories = df_filtered['7Day_Rolling_Consumed_Calories'].iloc[-1]
 avg_deficit = df_filtered['7Day_Rolling_Deficit'].iloc[-1]
 avg_steps = df_filtered['7Day_Rolling_Steps'].iloc[-1]
@@ -132,7 +137,8 @@ metrics = [
     ("👣 RL7 Daily Steps", f"{avg_steps:.0f}"),
     ("🏃 RL7 Exercise Calories", f"{avg_exercise_cal:.0f} kcal"),
     ("🔥 Longest Streak", f"{longest_streak} days"),
-    ("🔥 Current Streak", f"{current_streak} days")
+    ("🔥 Current Streak", f"{current_streak} days"),
+    ("⚖️ Lowest Weight", f"{lowest_weight:.1f} lbs on {lowest_weight_date.date()}")
 ]
 
 # Display metrics in rows of 4
