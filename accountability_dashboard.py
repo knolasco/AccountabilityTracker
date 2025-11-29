@@ -88,7 +88,7 @@ latest_avg_bf = df_filtered['7Day_Rolling_BF'].iloc[-1]
 bf_lost = starting_bf - latest_avg_bf
 
 # last time my weight was the lowest
-df_filtered_sorted = df_filtered.sort_values(['Weight', 'Date'], ascending=[False, False])
+df_filtered_sorted = df_filtered.sort_values(['Weight', 'Date'], ascending=[True, False])
 lowest_weight_date = df_filtered_sorted['Date'].iloc[0]
 lowest_weight = df_filtered_sorted['Weight'].iloc[0]
 
