@@ -120,10 +120,12 @@ for met in df_streak.sort_index(ascending=False)['All_Goals_Met']:
 # Adaptive layout: define metrics in rows of 4 for smaller screens
 metrics = [
     ("✅ Days All Goals Met", f"{goal_days}/{total_days} ({percent:.1f}%)"),
-    ("⚖️ Weight  (Observed)", f"{weight_lost:.1f} lbs"),
+    ("⚖️ Weight Lost (Observed)", f"{weight_lost:.1f} lbs"),
     ("⚖️ Weight Lost (Deficit)", f"{df_filtered['Weight_Lost_From_Deficit'].iloc[-1]:.1f} lbs"),
     ("📅 RL7 Weight Lost/Week", f"{df_filtered['7Day_Rolling_Avg_Weight_Lost_Per_Week'].iloc[-1]:.2f} lbs"),
     ("💪 Body Fat % Lost", f"{bf_lost:.1f}%"),
+    ("⚖️ RL7 Weight", f"{latest_avg_weight:.1f} lbs"),
+    ("💪 RL7 Body Fat %", f"{latest_avg_bf:.1f}%"),
     ("💪 RL7 Muscle Mass", f"{df_filtered['7Day_Rolling_Muscle'].iloc[-1]:.1f} lbs"),
     ("🔥 RL7 Calories Consumed", f"{avg_calories:.0f} kcal"),
     ("📉 RL7 Daily Deficit", f"{avg_deficit:.0f} kcal"),
