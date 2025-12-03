@@ -86,6 +86,12 @@ weight_lost = starting_weight - latest_avg_weight
 starting_bf = df_filtered['BF%'].iloc[0]
 latest_avg_bf = df_filtered['7Day_Rolling_BF'].iloc[-1]
 bf_lost = starting_bf - latest_avg_bf
+# -------------------------------
+# Target weight line: -1 lb/week
+# -------------------------------
+days_from_start = (df_filtered['Date'] - df_filtered['Date'].iloc[0]).dt.days
+projected_weight_1lb_per_week = df_filtered['Weight'].iloc[0] - (days_from_start / 7)
+
 
 # last time my weight was the lowest
 df_filtered_sorted = df_filtered.sort_values(['Weight', 'Date'], ascending=[True, False])
@@ -224,6 +230,20 @@ for i, (raw, rolling) in enumerate(paired_plots):
         ),
         row=row, col=col
     )
+
+    # --- Target 1 lb/week loss line (ONLY on Weight plot) ---
+    if raw == 'Weight':
+        fig.add_trace(
+            go.Scatter(
+                x=df_filtered['Date'],
+                y=projected_weight_1lb_per_week,
+                mode='lines',
+                line=dict(color='black', width=3, dash='dot'),
+                showlegend=False
+            ),
+            row=row, col=col
+        )
+
 
 # 7-Day Rolling Weight Change (row 5, col 1)
 fig.add_trace(
