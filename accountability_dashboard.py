@@ -225,7 +225,7 @@ for i, (raw, rolling) in enumerate(paired_plots):
     fig.add_trace(
         go.Scatter(
             x=df_filtered['Date'], y=df_filtered[rolling],
-            mode='lines', line=dict(color=dark_colors[i], width=1),
+            mode='lines', line=dict(color=dark_colors[i], width=3),
             showlegend=False
         ),
         row=row, col=col
