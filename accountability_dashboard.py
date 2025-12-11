@@ -257,13 +257,15 @@ fig.add_trace(
 )
 fig.add_hline(y=0, line_dash="dash", line_color="black", row=5, col=1)
 
-# Cumulative Deficit (row 5, col 2)
+# Cumulative Deficit (row 5, col 1) — AREA CHART
 fig.add_trace(
     go.Scatter(
         x=df_filtered['Date'],
         y=df_filtered['Cumulative_Deficit'],
         mode='lines',
         line=dict(color="#7f7f7f", width=2),
+        fill='tozeroy',  # <-- makes it an area chart
+        fillcolor="rgba(127,127,127,0.3)",  # light transparent fill
         showlegend=False
     ),
     row=5, col=1
