@@ -90,7 +90,7 @@ bf_lost = starting_bf - latest_avg_bf
 # Target weight line: -1 lb/week
 # -------------------------------
 days_from_start = (df_filtered['Date'] - df_filtered['Date'].iloc[0]).dt.days
-projected_weight_1lb_per_week = df_filtered['Weight'].iloc[0] - (days_from_start / 10)
+projected_weight_1lb_per_week = df_filtered['Weight'].iloc[0] - (days_from_start / 9)
 
 
 # last time my weight was the lowest
