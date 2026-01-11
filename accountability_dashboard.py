@@ -30,9 +30,9 @@ phase = st.sidebar.selectbox(
 )
 
 SHEET_MAP = {
-    "Cut": "Accountability Tracker - Cut",
-    "Maintenance": "Accountability Tracker - Maintenance",
-    "Lean Bulk": "Accountability Tracker - Lean Bulk"
+    "Cut": "Cut",
+    "Maintenance": "Maintenance",
+    "Lean Bulk": "Lean Bulk"
 }
 
 # ============================
