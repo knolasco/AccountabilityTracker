@@ -82,29 +82,34 @@ df_filtered = df[
 st.title(f"🏋️ Accountability Tracker — {phase}")
 
 # =========================
-# 📊 PHASE-SPECIFIC METRICS
+# 📊 PHASE-SPECIFIC METRICS (WITH DELTAS)
 # =========================
 
-# ---- Shared values ----
-latest_rl7_weight = df_filtered['7Day_Rolling_Weight'].iloc[-1]
-latest_rl7_calories = df_filtered['7Day_Rolling_Consumed_Calories'].iloc[-1]
-latest_rl7_steps = df_filtered['7Day_Rolling_Steps'].iloc[-1]
-latest_rl7_active_cal = df_filtered['7Day_Rolling_Activity_Calories'].iloc[-1]
+def weekly_delta(series):
+    if len(series) < 8:
+        return None
+    return series.iloc[-1] - series.iloc[-8]
+
+latest = df_filtered.iloc[-1]
+
+# ---- Shared rolling metrics ----
+rl7_weight = df_filtered['7Day_Rolling_Weight']
+rl7_calories = df_filtered['7Day_Rolling_Consumed_Calories']
+rl7_steps = df_filtered['7Day_Rolling_Steps']
+rl7_active = df_filtered['7Day_Rolling_Activity_Calories']
+rl7_deficit = df_filtered['7Day_Rolling_Deficit']
+rl7_weight_change = df_filtered['7Day_Rolling_Weight_Change']
 
 starting_weight = df_filtered['Weight'].iloc[0]
 
-# ---- CUT ONLY ----
+# ---- CUT PHASE ----
 if phase == "Cut":
 
     goal_days = df_filtered['All_Goals_Met'].sum()
     total_days = len(df_filtered)
 
-    weight_lost_observed = (
-        df_filtered['Weight'].iloc[0] - latest_rl7_weight
-    )
-
-    rl7_weight_lost_per_week = df_filtered['7Day_Rolling_Avg_Weight_Lost_Per_Week'].iloc[-1]
-    rl7_deficit = df_filtered['7Day_Rolling_Deficit'].iloc[-1]
+    weight_lost = starting_weight - rl7_weight.iloc[-1]
+    weight_lost_week = df_filtered['7Day_Rolling_Avg_Weight_Lost_Per_Week'].iloc[-1]
 
     # Lowest weight
     df_sorted = df_filtered.sort_values(['Weight', 'Date'], ascending=[True, False])
@@ -139,57 +144,59 @@ if phase == "Cut":
             break
 
     metrics = [
-        ("✅ Days All Goals Met", f"{goal_days}/{total_days}"),
-        ("⚖️ Weight Lost (Observed)", f"{weight_lost_observed:.1f} lbs"),
-        ("📉 RL7 Weight Lost / Week", f"{rl7_weight_lost_per_week:.2f} lbs"),
-        ("⚖️ RL7 Weight", f"{latest_rl7_weight:.1f} lbs"),
-        ("🔥 RL7 Calories Consumed", f"{latest_rl7_calories:.0f} kcal"),
-        ("👣 RL7 Steps", f"{latest_rl7_steps:.0f}"),
-        ("📉 RL7 Deficit", f"{rl7_deficit:.0f} kcal"),
-        ("🏃 RL7 Active Calories", f"{latest_rl7_active_cal:.0f} kcal"),
-        ("⚖️ Lowest Weight", f"{lowest_weight:.1f} lbs"),
-        ("📅 Days Since Lowest Weight", f"{days_since_lowest} days"),
-        ("🔥 Longest Streak", f"{longest_streak} days"),
-        ("🔥 Current Streak", f"{current_streak} days"),
+        ("✅ Days All Goals Met", f"{goal_days}/{total_days}", None),
+        ("⚖️ Weight Lost", f"{weight_lost:.1f} lbs", weekly_delta(rl7_weight) * -1),
+        ("📉 RL7 Weight Lost / Week", f"{weight_lost_week:.2f} lbs", None),
+        ("⚖️ RL7 Weight", f"{rl7_weight.iloc[-1]:.1f} lbs", weekly_delta(rl7_weight)),
+        ("🔥 RL7 Calories", f"{rl7_calories.iloc[-1]:.0f}", weekly_delta(rl7_calories)),
+        ("👣 RL7 Steps", f"{rl7_steps.iloc[-1]:.0f}", weekly_delta(rl7_steps)),
+        ("📉 RL7 Deficit", f"{rl7_deficit.iloc[-1]:.0f}", weekly_delta(rl7_deficit)),
+        ("🏃 RL7 Active Cal", f"{rl7_active.iloc[-1]:.0f}", weekly_delta(rl7_active)),
+        ("⚖️ Lowest Weight", f"{lowest_weight:.1f} lbs", None),
+        ("📅 Days Since Lowest", f"{days_since_lowest} days", None),
+        ("🔥 Longest Streak", f"{longest_streak} days", None),
+        ("🔥 Current Streak", f"{current_streak} days", None),
     ]
 
-# ---- MAINTENANCE ONLY ----
+# ---- MAINTENANCE PHASE ----
 elif phase == "Maintenance":
 
     metrics = [
-        ("⚖️ Starting Weight", f"{starting_weight:.1f} lbs"),
-        ("⚖️ RL7 Weight", f"{latest_rl7_weight:.1f} lbs"),
-        ("🔥 RL7 Calories Consumed", f"{latest_rl7_calories:.0f} kcal"),
-        ("👣 RL7 Steps", f"{latest_rl7_steps:.0f}"),
-        ("🏃 RL7 Active Calories", f"{latest_rl7_active_cal:.0f} kcal"),
+        ("⚖️ Starting Weight", f"{starting_weight:.1f} lbs", None),
+        ("⚖️ RL7 Weight", f"{rl7_weight.iloc[-1]:.1f} lbs", weekly_delta(rl7_weight)),
+        ("🔥 RL7 Calories", f"{rl7_calories.iloc[-1]:.0f}", weekly_delta(rl7_calories)),
+        ("👣 RL7 Steps", f"{rl7_steps.iloc[-1]:.0f}", weekly_delta(rl7_steps)),
+        ("🏃 RL7 Active Cal", f"{rl7_active.iloc[-1]:.0f}", weekly_delta(rl7_active)),
     ]
 
-# ---- LEAN BULK ONLY ----
+# ---- LEAN BULK PHASE ----
 elif phase == "Lean Bulk":
 
-    rl7_surplus = df_filtered['7Day_Rolling_Deficit'].iloc[-1] * -1
-    rl7_weight_gain_per_week = (
-        df_filtered['7Day_Rolling_Weight_Change'].rolling(7).sum().iloc[-1]
-    )
+    rl7_surplus = rl7_calories - rl7_active
+    rl7_weight_gain_week = rl7_weight.diff(7).iloc[-1]
 
     metrics = [
-        ("⚖️ Starting Weight", f"{starting_weight:.1f} lbs"),
-        ("⚖️ RL7 Weight", f"{latest_rl7_weight:.1f} lbs"),
-        ("🔥 RL7 Calories Consumed", f"{latest_rl7_calories:.0f} kcal"),
-        ("👣 RL7 Steps", f"{latest_rl7_steps:.0f}"),
-        ("📈 RL7 Surplus", f"{rl7_surplus:.0f} kcal"),
-        ("🏃 RL7 Active Calories", f"{latest_rl7_active_cal:.0f} kcal"),
-        ("📈 RL7 Weight Gain / Week", f"{rl7_weight_gain_per_week:.2f} lbs"),
+        ("⚖️ Starting Weight", f"{starting_weight:.1f} lbs", None),
+        ("⚖️ RL7 Weight", f"{rl7_weight.iloc[-1]:.1f} lbs", weekly_delta(rl7_weight)),
+        ("🔥 RL7 Calories", f"{rl7_calories.iloc[-1]:.0f}", weekly_delta(rl7_calories)),
+        ("👣 RL7 Steps", f"{rl7_steps.iloc[-1]:.0f}", weekly_delta(rl7_steps)),
+        ("📈 RL7 Surplus", f"{rl7_surplus.iloc[-1]:.0f}", weekly_delta(rl7_surplus)),
+        ("🏃 RL7 Active Cal", f"{rl7_active.iloc[-1]:.0f}", weekly_delta(rl7_active)),
+        ("📈 RL7 Weight Gain / Week", f"{rl7_weight_gain_week:.2f} lbs", None),
     ]
 
-# ---- DISPLAY METRICS ----
+# ---- DISPLAY ----
 st.subheader("📌 Key Metrics")
 
 cols_per_row = 4
 for i in range(0, len(metrics), cols_per_row):
     cols = st.columns(min(cols_per_row, len(metrics) - i))
-    for col, (title, value) in zip(cols, metrics[i:i + cols_per_row]):
-        col.metric(title, value)
+    for col, (title, value, delta) in zip(cols, metrics[i:i + cols_per_row]):
+        if delta is not None:
+            col.metric(title, value, f"{delta:+.1f}")
+        else:
+            col.metric(title, value)
+
 
 # =========================
 # 📊 PLOTTING (UNCHANGED)
