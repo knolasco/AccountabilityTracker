@@ -82,6 +82,116 @@ df_filtered = df[
 st.title(f"🏋️ Accountability Tracker — {phase}")
 
 # =========================
+# 📊 PHASE-SPECIFIC METRICS
+# =========================
+
+# ---- Shared values ----
+latest_rl7_weight = df_filtered['7Day_Rolling_Weight'].iloc[-1]
+latest_rl7_calories = df_filtered['7Day_Rolling_Consumed_Calories'].iloc[-1]
+latest_rl7_steps = df_filtered['7Day_Rolling_Steps'].iloc[-1]
+latest_rl7_active_cal = df_filtered['7Day_Rolling_Activity_Calories'].iloc[-1]
+
+starting_weight = df_filtered['Weight'].iloc[0]
+
+# ---- CUT ONLY ----
+if phase == "Cut":
+
+    goal_days = df_filtered['All_Goals_Met'].sum()
+    total_days = len(df_filtered)
+
+    weight_lost_observed = (
+        df_filtered['Weight'].iloc[0] - latest_rl7_weight
+    )
+
+    rl7_weight_lost_per_week = df_filtered['7Day_Rolling_Avg_Weight_Lost_Per_Week'].iloc[-1]
+    rl7_deficit = df_filtered['7Day_Rolling_Deficit'].iloc[-1]
+
+    # Lowest weight
+    df_sorted = df_filtered.sort_values(['Weight', 'Date'], ascending=[True, False])
+    lowest_weight = df_sorted['Weight'].iloc[0]
+    lowest_weight_date = df_sorted['Date'].iloc[0]
+    days_since_lowest = (df_filtered['Date'].iloc[-1] - lowest_weight_date).days
+
+    # Streaks
+    def compute_streaks(series):
+        max_streak = curr_streak = 0
+        last_date = None
+        for date, met in zip(series.index, series):
+            if met:
+                if last_date is None or (date - last_date).days == 1:
+                    curr_streak += 1
+                else:
+                    curr_streak = 1
+                max_streak = max(max_streak, curr_streak)
+            else:
+                curr_streak = 0
+            last_date = date
+        return max_streak
+
+    df_streak = df_filtered.set_index('Date')
+    longest_streak = compute_streaks(df_streak['All_Goals_Met'])
+
+    current_streak = 0
+    for met in df_streak.sort_index(ascending=False)['All_Goals_Met']:
+        if met:
+            current_streak += 1
+        else:
+            break
+
+    metrics = [
+        ("✅ Days All Goals Met", f"{goal_days}/{total_days}"),
+        ("⚖️ Weight Lost (Observed)", f"{weight_lost_observed:.1f} lbs"),
+        ("📉 RL7 Weight Lost / Week", f"{rl7_weight_lost_per_week:.2f} lbs"),
+        ("⚖️ RL7 Weight", f"{latest_rl7_weight:.1f} lbs"),
+        ("🔥 RL7 Calories Consumed", f"{latest_rl7_calories:.0f} kcal"),
+        ("👣 RL7 Steps", f"{latest_rl7_steps:.0f}"),
+        ("📉 RL7 Deficit", f"{rl7_deficit:.0f} kcal"),
+        ("🏃 RL7 Active Calories", f"{latest_rl7_active_cal:.0f} kcal"),
+        ("⚖️ Lowest Weight", f"{lowest_weight:.1f} lbs"),
+        ("📅 Days Since Lowest Weight", f"{days_since_lowest} days"),
+        ("🔥 Longest Streak", f"{longest_streak} days"),
+        ("🔥 Current Streak", f"{current_streak} days"),
+    ]
+
+# ---- MAINTENANCE ONLY ----
+elif phase == "Maintenance":
+
+    metrics = [
+        ("⚖️ Starting Weight", f"{starting_weight:.1f} lbs"),
+        ("⚖️ RL7 Weight", f"{latest_rl7_weight:.1f} lbs"),
+        ("🔥 RL7 Calories Consumed", f"{latest_rl7_calories:.0f} kcal"),
+        ("👣 RL7 Steps", f"{latest_rl7_steps:.0f}"),
+        ("🏃 RL7 Active Calories", f"{latest_rl7_active_cal:.0f} kcal"),
+    ]
+
+# ---- LEAN BULK ONLY ----
+elif phase == "Lean Bulk":
+
+    rl7_surplus = df_filtered['7Day_Rolling_Deficit'].iloc[-1] * -1
+    rl7_weight_gain_per_week = (
+        df_filtered['7Day_Rolling_Weight_Change'].rolling(7).sum().iloc[-1]
+    )
+
+    metrics = [
+        ("⚖️ Starting Weight", f"{starting_weight:.1f} lbs"),
+        ("⚖️ RL7 Weight", f"{latest_rl7_weight:.1f} lbs"),
+        ("🔥 RL7 Calories Consumed", f"{latest_rl7_calories:.0f} kcal"),
+        ("👣 RL7 Steps", f"{latest_rl7_steps:.0f}"),
+        ("📈 RL7 Surplus", f"{rl7_surplus:.0f} kcal"),
+        ("🏃 RL7 Active Calories", f"{latest_rl7_active_cal:.0f} kcal"),
+        ("📈 RL7 Weight Gain / Week", f"{rl7_weight_gain_per_week:.2f} lbs"),
+    ]
+
+# ---- DISPLAY METRICS ----
+st.subheader("📌 Key Metrics")
+
+cols_per_row = 4
+for i in range(0, len(metrics), cols_per_row):
+    cols = st.columns(min(cols_per_row, len(metrics) - i))
+    for col, (title, value) in zip(cols, metrics[i:i + cols_per_row]):
+        col.metric(title, value)
+
+# =========================
 # 📊 PLOTTING (UNCHANGED)
 # =========================
 
