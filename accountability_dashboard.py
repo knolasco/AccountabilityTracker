@@ -5,10 +5,9 @@ from plotly.subplots import make_subplots
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# ============================
-# 🔐 Google Sheets Auth
-# ============================
-
+# =========================
+# 🔐 GOOGLE SHEETS SETUP
+# =========================
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
@@ -18,205 +17,152 @@ creds_dict = st.secrets["google"]
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(credentials)
 
-# ============================
-# 📊 Phase Selection
-# ============================
+SPREADSHEET_NAME = "Accountability Tracker"
 
-st.sidebar.title("📊 Phase Selection")
-
-phase = st.sidebar.selectbox(
-    "Select Phase",
-    ["Cut", "Maintenance", "Lean Bulk"]
-)
-
-SHEET_MAP = {
+PHASE_TABS = {
     "Cut": "Cut",
     "Maintenance": "Maintenance",
     "Lean Bulk": "Lean Bulk"
 }
 
-# ============================
-# 📥 Load Sheet
-# ============================
-
-def load_sheet(sheet_name):
-    sheet = client.open(sheet_name).sheet1
+# =========================
+# 📥 LOAD DATA FUNCTION
+# =========================
+@st.cache_data(ttl=300)
+def load_phase_data(tab_name):
+    sheet = client.open(SPREADSHEET_NAME).worksheet(tab_name)
     data = sheet.get_all_records()
     df = pd.DataFrame(data)
+
     df['Date'] = pd.to_datetime(df['Date'])
     df.sort_values('Date', inplace=True)
-    return df
 
-df = load_sheet(SHEET_MAP[phase])
+    # -------------------------
+    # Metrics & Derived Columns
+    # -------------------------
+    df['Deficit'] = df['Calories from Exercise'] - df['Calories Consumed']
+    df['Goal_Deficit'] = df['Deficit'] > 0
+    df['All_Goals_Met'] = df['Goal_Deficit'] & df['Protein > 130']
 
-# ============================
-# ⚙️ Preprocessing
-# ============================
-
-def preprocess_df(df, phase):
-    df = df.copy()
-
-    # Energy balance (positive = deficit)
-    df['Energy_Balance'] = df['Calories from Exercise'] - df['Calories Consumed']
-
-    if phase == "Cut":
-        df['Goal_Energy'] = df['Energy_Balance'] > 0
-    elif phase == "Maintenance":
-        df['Goal_Energy'] = df['Energy_Balance'].between(-150, 150)
-    else:  # Lean Bulk
-        df['Goal_Energy'] = df['Energy_Balance'] < -150
-
-    df['All_Goals_Met'] = df['Goal_Energy'] & df['Protein > 130']
-
-    # Rolling metrics
+    # Rolling averages
     df['7Day_Rolling_Weight'] = df['Weight'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_BF'] = df['BF%'].rolling(7, min_periods=1).mean()
-    df['7Day_Rolling_Energy'] = df['Energy_Balance'].rolling(7, min_periods=1).mean()
+    df['7Day_Rolling_Deficit'] = df['Deficit'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Steps'] = df['Steps'].rolling(7, min_periods=1).mean()
+    df['7Day_Rolling_Consumed_Calories'] = df['Calories Consumed'].rolling(7, min_periods=1).mean()
+    df['7Day_Rolling_Activity_Calories'] = df['Calories from Exercise'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Muscle'] = df['Muscle Mass'].rolling(7, min_periods=1).mean()
-    df['7Day_Rolling_Consumed'] = df['Calories Consumed'].rolling(7, min_periods=1).mean()
-    df['7Day_Rolling_Exercise'] = df['Calories from Exercise'].rolling(7, min_periods=1).mean()
 
-    # Cumulative energy
-    df['Cumulative_Energy'] = df['Energy_Balance'].cumsum()
-    df['Weight_Change_From_Energy'] = df['Cumulative_Energy'] / 3500
+    # Weight change & deficit math
+    df['7Day_Rolling_Weight_Change'] = df['7Day_Rolling_Weight'].diff()
+    df['Cumulative_Deficit'] = df['Deficit'].cumsum()
+    df['Weight_Lost_From_Deficit'] = df['Cumulative_Deficit'] / 3500
+    df['7Day_Rolling_Avg_Weight_Lost_Per_Week'] = (
+        df['Deficit'].rolling(7, min_periods=1).sum() / 3500
+    )
 
     return df
 
-df = preprocess_df(df, phase)
 
-# ============================
-# 📅 Date Filters
-# ============================
+# =========================
+# 🎛️ SIDEBAR
+# =========================
+st.sidebar.title("⚙️ Controls")
 
-st.sidebar.title("📅 Filters")
+selected_phase = st.sidebar.selectbox(
+    "Phase",
+    list(PHASE_TABS.keys())
+)
+
+df = load_phase_data(PHASE_TABS[selected_phase])
 
 start_date = st.sidebar.date_input("Start Date", df['Date'].min())
 end_date = st.sidebar.date_input("End Date", df['Date'].max())
 
-df_filtered = df[
-    (df['Date'] >= pd.to_datetime(start_date)) &
-    (df['Date'] <= pd.to_datetime(end_date))
-]
+df = df[(df['Date'] >= pd.to_datetime(start_date)) &
+        (df['Date'] <= pd.to_datetime(end_date))]
 
-# ============================
-# 🧮 Summary Metrics
-# ============================
+# =========================
+# 🏋️ HEADER
+# =========================
+st.title(f"🏋️ Accountability Tracker — {selected_phase}")
 
-st.title(f"🏋️ Accountability Tracker — {phase}")
+# =========================
+# 📊 SUMMARY METRICS
+# =========================
+goal_days = df['All_Goals_Met'].sum()
+total_days = len(df)
+percent = (goal_days / total_days) * 100 if total_days else 0
 
-goal_days = df_filtered['All_Goals_Met'].sum()
-total_days = len(df_filtered)
-percent = (goal_days / total_days * 100) if total_days else 0
+starting_weight = df['Weight'].iloc[0]
+latest_weight = df['7Day_Rolling_Weight'].iloc[-1]
+weight_lost = starting_weight - latest_weight
 
-starting_weight = df_filtered['Weight'].iloc[0]
-latest_avg_weight = df_filtered['7Day_Rolling_Weight'].iloc[-1]
-weight_change = latest_avg_weight - starting_weight
+cols = st.columns(4)
+cols[0].metric("✅ Goal Days", f"{goal_days}/{total_days}")
+cols[1].metric("📈 Success Rate", f"{percent:.1f}%")
+cols[2].metric("⚖️ Weight Change", f"{weight_lost:.1f} lbs")
+cols[3].metric("🔥 RL7 Deficit", f"{df['7Day_Rolling_Deficit'].iloc[-1]:.0f} kcal")
 
-starting_bf = df_filtered['BF%'].iloc[0]
-latest_avg_bf = df_filtered['7Day_Rolling_BF'].iloc[-1]
-bf_change = latest_avg_bf - starting_bf
-
-avg_energy = df_filtered['7Day_Rolling_Energy'].iloc[-1]
-avg_steps = df_filtered['7Day_Rolling_Steps'].iloc[-1]
-avg_exercise = df_filtered['7Day_Rolling_Exercise'].iloc[-1]
-avg_consumed = df_filtered['7Day_Rolling_Consumed'].iloc[-1]
-
-label = {
-    "Cut": "Daily Deficit",
-    "Maintenance": "Energy Balance",
-    "Lean Bulk": "Daily Surplus"
-}[phase]
-
-metrics = [
-    ("✅ Days Goals Met", f"{goal_days}/{total_days} ({percent:.1f}%)"),
-    ("⚖️ Weight Change", f"{weight_change:+.1f} lbs"),
-    ("💪 BF% Change", f"{bf_change:+.1f}%"),
-    ("⚖️ RL7 Weight", f"{latest_avg_weight:.1f} lbs"),
-    ("💪 RL7 Muscle", f"{df_filtered['7Day_Rolling_Muscle'].iloc[-1]:.1f} lbs"),
-    ("🔥 RL7 Calories", f"{avg_consumed:.0f} kcal"),
-    (f"🔥 RL7 {label}", f"{avg_energy:.0f} kcal"),
-    ("👣 RL7 Steps", f"{avg_steps:.0f}"),
-    ("🏃 RL7 Exercise Cals", f"{avg_exercise:.0f}")
-]
-
-cols = st.columns(3)
-for i, (title, value) in enumerate(metrics):
-    cols[i % 3].metric(title, value)
-
-# ============================
-# 📈 Projection Line
-# ============================
-
-days_from_start = (df_filtered['Date'] - df_filtered['Date'].iloc[0]).dt.days
-
-weekly_rate = {
-    "Cut": -1.0,
-    "Maintenance": 0.0,
-    "Lean Bulk": 0.25
-}[phase]
-
-projected_weight = (
-    df_filtered['Weight'].iloc[0]
-    + (days_from_start / 7) * weekly_rate
-)
-
-# ============================
-# 📊 Plots
-# ============================
-
+# =========================
+# 📈 PLOTS
+# =========================
 fig = make_subplots(
-    rows=4, cols=2,
+    rows=4,
+    cols=2,
     subplot_titles=[
-        "Weight", "BF%",
-        "Muscle Mass", "Steps",
-        "Calories Consumed", "Exercise Calories",
-        "Energy Balance", "Cumulative Energy"
+        "Weight",
+        "Body Fat %",
+        "Muscle Mass",
+        "Steps",
+        "Calories Consumed",
+        "Exercise Calories",
+        "Daily Deficit",
+        "Cumulative Deficit"
     ]
 )
 
 pairs = [
-    ("Weight", "7Day_Rolling_Weight"),
-    ("BF%", "7Day_Rolling_BF"),
-    ("Muscle Mass", "7Day_Rolling_Muscle"),
-    ("Steps", "7Day_Rolling_Steps"),
-    ("Calories Consumed", "7Day_Rolling_Consumed"),
-    ("Calories from Exercise", "7Day_Rolling_Exercise"),
-    ("Energy_Balance", "7Day_Rolling_Energy")
+    ('Weight', '7Day_Rolling_Weight'),
+    ('BF%', '7Day_Rolling_BF'),
+    ('Muscle Mass', '7Day_Rolling_Muscle'),
+    ('Steps', '7Day_Rolling_Steps'),
+    ('Calories Consumed', '7Day_Rolling_Consumed_Calories'),
+    ('Calories from Exercise', '7Day_Rolling_Activity_Calories'),
+    ('Deficit', '7Day_Rolling_Deficit'),
 ]
 
 for i, (raw, rolling) in enumerate(pairs):
-    row = (i // 2) + 1
-    col = (i % 2) + 1
+    r = (i // 2) + 1
+    c = (i % 2) + 1
 
     fig.add_trace(
-        go.Scatter(x=df_filtered['Date'], y=df_filtered[raw],
-                   line=dict(color="lightgray"), showlegend=False),
-        row=row, col=col
+        go.Scatter(
+            x=df['Date'],
+            y=df[raw],
+            line=dict(width=2),
+            opacity=0.3,
+            showlegend=False
+        ),
+        row=r, col=c
     )
+
     fig.add_trace(
-        go.Scatter(x=df_filtered['Date'], y=df_filtered[rolling],
-                   line=dict(color="black", width=3), showlegend=False),
-        row=row, col=col
+        go.Scatter(
+            x=df['Date'],
+            y=df[rolling],
+            line=dict(width=3),
+            showlegend=False
+        ),
+        row=r, col=c
     )
 
-    if raw == "Weight":
-        fig.add_trace(
-            go.Scatter(
-                x=df_filtered['Date'],
-                y=projected_weight,
-                line=dict(color="black", dash="dot"),
-                showlegend=False
-            ),
-            row=row, col=col
-        )
-
+# Cumulative deficit (area)
 fig.add_trace(
     go.Scatter(
-        x=df_filtered['Date'],
-        y=df_filtered['Cumulative_Energy'],
+        x=df['Date'],
+        y=df['Cumulative_Deficit'],
         fill='tozeroy',
-        line=dict(color="gray"),
         showlegend=False
     ),
     row=4, col=2
@@ -225,10 +171,8 @@ fig.add_trace(
 fig.update_layout(
     height=1600,
     plot_bgcolor="white",
-    paper_bgcolor="white"
+    paper_bgcolor="white",
+    showlegend=False
 )
-
-fig.update_xaxes(showgrid=False)
-fig.update_yaxes(showgrid=False)
 
 st.plotly_chart(fig, use_container_width=True)
