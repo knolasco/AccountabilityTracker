@@ -6,7 +6,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 # =========================
-# 🔐 GOOGLE SHEETS SETUP
+# 🔐 GOOGLE SHEETS AUTH
 # =========================
 scope = [
     "https://spreadsheets.google.com/feeds",
@@ -26,20 +26,17 @@ PHASE_TABS = {
 }
 
 # =========================
-# 📥 LOAD DATA FUNCTION
+# 📥 LOAD DATA
 # =========================
 @st.cache_data(ttl=300)
-def load_phase_data(tab_name):
+def load_data(tab_name):
     sheet = client.open(SPREADSHEET_NAME).worksheet(tab_name)
-    data = sheet.get_all_records()
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(sheet.get_all_records())
 
     df['Date'] = pd.to_datetime(df['Date'])
     df.sort_values('Date', inplace=True)
 
-    # -------------------------
-    # Metrics & Derived Columns
-    # -------------------------
+    # Core metrics
     df['Deficit'] = df['Calories from Exercise'] - df['Calories Consumed']
     df['Goal_Deficit'] = df['Deficit'] > 0
     df['All_Goals_Met'] = df['Goal_Deficit'] & df['Protein > 130']
@@ -49,11 +46,11 @@ def load_phase_data(tab_name):
     df['7Day_Rolling_BF'] = df['BF%'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Deficit'] = df['Deficit'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Steps'] = df['Steps'].rolling(7, min_periods=1).mean()
-    df['7Day_Rolling_Consumed_Calories'] = df['Calories Consumed'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Activity_Calories'] = df['Calories from Exercise'].rolling(7, min_periods=1).mean()
+    df['7Day_Rolling_Consumed_Calories'] = df['Calories Consumed'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Muscle'] = df['Muscle Mass'].rolling(7, min_periods=1).mean()
 
-    # Weight change & deficit math
+    # Change & deficit math
     df['7Day_Rolling_Weight_Change'] = df['7Day_Rolling_Weight'].diff()
     df['Cumulative_Deficit'] = df['Deficit'].cumsum()
     df['Weight_Lost_From_Deficit'] = df['Cumulative_Deficit'] / 3500
@@ -63,116 +60,135 @@ def load_phase_data(tab_name):
 
     return df
 
-
 # =========================
 # 🎛️ SIDEBAR
 # =========================
 st.sidebar.title("⚙️ Controls")
 
-selected_phase = st.sidebar.selectbox(
-    "Phase",
-    list(PHASE_TABS.keys())
-)
-
-df = load_phase_data(PHASE_TABS[selected_phase])
+phase = st.sidebar.selectbox("Phase", list(PHASE_TABS.keys()))
+df = load_data(PHASE_TABS[phase])
 
 start_date = st.sidebar.date_input("Start Date", df['Date'].min())
 end_date = st.sidebar.date_input("End Date", df['Date'].max())
 
-df = df[(df['Date'] >= pd.to_datetime(start_date)) &
-        (df['Date'] <= pd.to_datetime(end_date))]
+df_filtered = df[
+    (df['Date'] >= pd.to_datetime(start_date)) &
+    (df['Date'] <= pd.to_datetime(end_date))
+]
 
 # =========================
-# 🏋️ HEADER
+# 🏋️ TITLE
 # =========================
-st.title(f"🏋️ Accountability Tracker — {selected_phase}")
+st.title(f"🏋️ Accountability Tracker — {phase}")
 
 # =========================
-# 📊 SUMMARY METRICS
+# 📊 PLOTTING (UNCHANGED)
 # =========================
-goal_days = df['All_Goals_Met'].sum()
-total_days = len(df)
-percent = (goal_days / total_days) * 100 if total_days else 0
 
-starting_weight = df['Weight'].iloc[0]
-latest_weight = df['7Day_Rolling_Weight'].iloc[-1]
-weight_lost = starting_weight - latest_weight
+dark_colors = [
+    "#1f77b4", "#ff7f0e", "#2ca02c",
+    "#d62728", "#9467bd", "#8c564b", "#17becf"
+]
 
-cols = st.columns(4)
-cols[0].metric("✅ Goal Days", f"{goal_days}/{total_days}")
-cols[1].metric("📈 Success Rate", f"{percent:.1f}%")
-cols[2].metric("⚖️ Weight Change", f"{weight_lost:.1f} lbs")
-cols[3].metric("🔥 RL7 Deficit", f"{df['7Day_Rolling_Deficit'].iloc[-1]:.0f} kcal")
+light_colors = [
+    "#aec7e8", "#ffbb78", "#98df8a",
+    "#ff9896", "#c5b0d5", "#c49c94", "#9edae5"
+]
 
-# =========================
-# 📈 PLOTS
-# =========================
-fig = make_subplots(
-    rows=4,
-    cols=2,
-    subplot_titles=[
-        "Weight",
-        "Body Fat %",
-        "Muscle Mass",
-        "Steps",
-        "Calories Consumed",
-        "Exercise Calories",
-        "Daily Deficit",
-        "Cumulative Deficit"
-    ]
-)
+plot_titles = [
+    "Weight", "BF%", "Muscle Mass", "Steps",
+    "Calories Consumed", "Exercise Calories",
+    "Deficit", "7-Day Rolling Weight Change",
+    "Cumulative Deficit", "Deficit vs RL7 Weight Change"
+]
 
-pairs = [
+fig = make_subplots(rows=5, cols=2, subplot_titles=plot_titles)
+
+paired_plots = [
     ('Weight', '7Day_Rolling_Weight'),
     ('BF%', '7Day_Rolling_BF'),
     ('Muscle Mass', '7Day_Rolling_Muscle'),
     ('Steps', '7Day_Rolling_Steps'),
     ('Calories Consumed', '7Day_Rolling_Consumed_Calories'),
     ('Calories from Exercise', '7Day_Rolling_Activity_Calories'),
-    ('Deficit', '7Day_Rolling_Deficit'),
+    ('Deficit', '7Day_Rolling_Deficit')
 ]
 
-for i, (raw, rolling) in enumerate(pairs):
-    r = (i // 2) + 1
-    c = (i % 2) + 1
+for i, (raw, rolling) in enumerate(paired_plots):
+    row = (i // 2) + 1
+    col = (i % 2) + 1
 
     fig.add_trace(
         go.Scatter(
-            x=df['Date'],
-            y=df[raw],
-            line=dict(width=2),
-            opacity=0.3,
+            x=df_filtered['Date'],
+            y=df_filtered[raw],
+            mode='lines',
+            line=dict(color=light_colors[i], width=2),
             showlegend=False
         ),
-        row=r, col=c
+        row=row, col=col
     )
 
     fig.add_trace(
         go.Scatter(
-            x=df['Date'],
-            y=df[rolling],
-            line=dict(width=3),
+            x=df_filtered['Date'],
+            y=df_filtered[rolling],
+            mode='lines',
+            line=dict(color=dark_colors[i], width=3),
             showlegend=False
         ),
-        row=r, col=c
+        row=row, col=col
     )
 
-# Cumulative deficit (area)
+# 7-day rolling weight change (BAR)
 fig.add_trace(
-    go.Scatter(
-        x=df['Date'],
-        y=df['Cumulative_Deficit'],
-        fill='tozeroy',
+    go.Bar(
+        x=df_filtered['Date'],
+        y=df_filtered['7Day_Rolling_Weight_Change'],
+        marker_color="#e377c2",
         showlegend=False
     ),
     row=4, col=2
 )
 
+# Cumulative deficit (AREA)
+fig.add_trace(
+    go.Scatter(
+        x=df_filtered['Date'],
+        y=df_filtered['Cumulative_Deficit'],
+        mode='lines',
+        fill='tozeroy',
+        fillcolor="rgba(127,127,127,0.3)",
+        line=dict(color="#7f7f7f", width=2),
+        showlegend=False
+    ),
+    row=5, col=1
+)
+
+# Scatter: deficit vs weight change
+fig.add_trace(
+    go.Scatter(
+        x=df_filtered['Deficit'],
+        y=df_filtered['7Day_Rolling_Weight_Change'],
+        mode='markers',
+        marker=dict(size=6, opacity=0.7),
+        showlegend=False
+    ),
+    row=5, col=2
+)
+
+fig.add_hline(y=0, row=5, col=2, line_dash="dash", line_color="black")
+fig.add_vline(x=0, row=5, col=2, line_dash="dash", line_color="black")
+
 fig.update_layout(
-    height=1600,
+    height=2000,
     plot_bgcolor="white",
     paper_bgcolor="white",
-    showlegend=False
+    showlegend=False,
+    font=dict(color="black")
 )
+
+fig.update_xaxes(showgrid=False, showticklabels=False)
+fig.update_yaxes(showgrid=False, zeroline=False)
 
 st.plotly_chart(fig, use_container_width=True)
