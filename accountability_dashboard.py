@@ -21,7 +21,7 @@ credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope
 client = gspread.authorize(credentials)
 
 # Open sheet
-sheet = client.open("Accountability Tracker").sheet1
+sheet = client.open("Copy of Accountability Tracker").sheet1
 data = sheet.get_all_records()
 df = pd.DataFrame(data)
 df['Date'] = pd.to_datetime(df['Date'])
