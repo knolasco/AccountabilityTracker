@@ -57,6 +57,9 @@ def load_data(tab_name):
     df['7Day_Rolling_Avg_Weight_Lost_Per_Week'] = (
         df['Deficit'].rolling(7, min_periods=1).sum() / 3500
     )
+    # Weekly rate of change (7-day rolling avg vs 7 days ago)
+    df['RL7_Weekly_Weight_Diff'] = df['7Day_Rolling_Weight'].diff(7)
+
 
     return df
 
@@ -216,7 +219,7 @@ plot_titles = [
     "Weight", "BF%", "Muscle Mass", "Steps",
     "Calories Consumed", "Exercise Calories",
     "Deficit", "7-Day Rolling Weight Change",
-    "Cumulative Deficit", "Deficit vs RL7 Weight Change"
+    "Cumulative Deficit", "RL7 Weekly Weight Change (lbs/week)"
 ]
 
 fig = make_subplots(rows=5, cols=2, subplot_titles=plot_titles)
@@ -282,20 +285,48 @@ fig.add_trace(
     row=5, col=1
 )
 
-# Scatter: deficit vs weight change
+# RL7 weekly weight change (BAR)
 fig.add_trace(
-    go.Scatter(
-        x=df_filtered['Deficit'],
-        y=df_filtered['7Day_Rolling_Weight_Change'],
-        mode='markers',
-        marker=dict(size=6, opacity=0.7),
+    go.Bar(
+        x=df_filtered['Date'],
+        y=df_filtered['RL7_Weekly_Weight_Diff'],
+        marker_color="#1f77b4",
         showlegend=False
     ),
     row=5, col=2
 )
 
-fig.add_hline(y=0, row=5, col=2, line_dash="dash", line_color="black")
-fig.add_vline(x=0, row=5, col=2, line_dash="dash", line_color="black")
+# Reference lines: ±1 lb/week
+fig.add_hline(
+    y=-1,
+    row=5,
+    col=2,
+    line_dash="dash",
+    line_color="black"
+)
+
+fig.add_hline(
+    y=0,
+    row=5,
+    col=2,
+    line_dash="dot",
+    line_color="gray"
+)
+
+fig.add_hline(
+    y=1,
+    row=5,
+    col=2,
+    line_dash="dash",
+    line_color="black"
+)
+
+fig.update_yaxes(
+    title_text="lbs / week",
+    row=5,
+    col=2
+)
+
 
 fig.update_layout(
     height=2000,
