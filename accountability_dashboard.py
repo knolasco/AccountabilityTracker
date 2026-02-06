@@ -46,7 +46,7 @@ def load_data(tab_name):
     def classify_activity(row):
         steps = row.get("Steps", 0) or 0
         mins = row.get("Exercise Minutes", 0) or 0
-        garmin_total = row.get("Garmin_Total_Cals", BASE_LIGHT_TDEE) or BASE_LIGHT_TDEE
+        garmin_total = row.get("Garmin Total Calories", BASE_LIGHT_TDEE) or BASE_LIGHT_TDEE
 
         score = 0
 
