@@ -293,7 +293,7 @@ for i, (raw, rolling) in enumerate(paired_plots):
         ),
         row=row, col=col
     )
-fig.update_yaxes(range=[1900, 3000], row=3, col=2)
+fig.update_yaxes(range=[2200, 2900], row=3, col=2)
 
 
 # 7-day rolling weight change (BAR)
