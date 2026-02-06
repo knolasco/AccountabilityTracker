@@ -44,33 +44,25 @@ def load_data(tab_name):
 
     # Helper: robust activity scoring using multiple signals
     def classify_activity(row):
-        steps = row.get("Steps", 0) or 0
-        mins = row.get("Exercise Minutes", 0) or 0
-        garmin_total = row.get("Garmin Total Calories", BASE_LIGHT_TDEE) or BASE_LIGHT_TDEE
+    steps = row.get("Steps", 0) or 0
+    mins = row.get("Exercise Minutes", 0) or 0
+    g = row.get("Garmin_Total_Cals", 0) or 0
 
-        score = 0
+    # 1) Easy: low training load OR low Garmin total, even if steps are high
+    # This matches your 2/4 (60 min, 12k steps, 2456 total) being "easy"
+    if (mins < 70 and g < 2550):
+        return "Light"
 
-        # Steps signal
-        if steps >= 13000: score += 2
-        elif steps >= 9000: score += 1
+    # 2) Hard: very high training load OR Garmin clearly high
+    if (mins >= 160) or (g >= 2950):
+        return "Hard"
 
-        # Exercise minutes signal
-        if mins >= 140: score += 2
-        elif mins >= 70: score += 1
+    # 3) Medium: everything else, with a small boost for high-step days
+    # If you want, you can treat very high steps as Medium even with moderate minutes.
+    if (mins >= 70) or (g >= 2650) or (steps >= 12000 and g >= 2550):
+        return "Medium"
 
-        # Garmin total calories signal (use as a *hint*, not truth)
-        # Compare above BMR, not absolute.
-        above_bmr = max(0, garmin_total - BMR)
-        if above_bmr >= 900: score += 2
-        elif above_bmr >= 650: score += 1
-
-        # Convert score → label
-        if score >= 4:
-            return "Hard"
-        elif score >= 2:
-            return "Medium"
-        else:
-            return "Light"
+    return "Light"
 
     df["Activity_Level"] = df.apply(classify_activity, axis=1)
 
@@ -301,6 +293,8 @@ for i, (raw, rolling) in enumerate(paired_plots):
         ),
         row=row, col=col
     )
+fig.update_yaxes(range=[1700, 3200], row=3, col=2)
+
 
 # 7-day rolling weight change (BAR)
 fig.add_trace(
