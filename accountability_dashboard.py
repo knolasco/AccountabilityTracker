@@ -44,25 +44,25 @@ def load_data(tab_name):
 
     # Helper: robust activity scoring using multiple signals
     def classify_activity(row):
-    steps = row.get("Steps", 0) or 0
-    mins = row.get("Exercise Minutes", 0) or 0
-    g = row.get("Garmin_Total_Cals", 0) or 0
+        steps = row.get("Steps", 0) or 0
+        mins = row.get("Exercise Minutes", 0) or 0
+        g = row.get("Garmin_Total_Cals", 0) or 0
 
-    # 1) Easy: low training load OR low Garmin total, even if steps are high
-    # This matches your 2/4 (60 min, 12k steps, 2456 total) being "easy"
-    if (mins < 70 and g < 2550):
+        # 1) Easy: low training load OR low Garmin total, even if steps are high
+        # This matches your 2/4 (60 min, 12k steps, 2456 total) being "easy"
+        if (mins < 70 and g < 2550):
+            return "Light"
+
+        # 2) Hard: very high training load OR Garmin clearly high
+        if (mins >= 160) or (g >= 2950):
+            return "Hard"
+
+        # 3) Medium: everything else, with a small boost for high-step days
+        # If you want, you can treat very high steps as Medium even with moderate minutes.
+        if (mins >= 70) or (g >= 2650) or (steps >= 12000 and g >= 2550):
+            return "Medium"
+
         return "Light"
-
-    # 2) Hard: very high training load OR Garmin clearly high
-    if (mins >= 160) or (g >= 2950):
-        return "Hard"
-
-    # 3) Medium: everything else, with a small boost for high-step days
-    # If you want, you can treat very high steps as Medium even with moderate minutes.
-    if (mins >= 70) or (g >= 2650) or (steps >= 12000 and g >= 2550):
-        return "Medium"
-
-    return "Light"
 
     df["Activity_Level"] = df.apply(classify_activity, axis=1)
 
