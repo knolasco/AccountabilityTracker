@@ -37,16 +37,58 @@ def load_data(tab_name):
     df.sort_values('Date', inplace=True)
 
     # Core metrics
-    df['Deficit'] = df['Calories from Exercise'] - df['Calories Consumed']
-    df['Goal_Deficit'] = df['Deficit'] > 0
-    df['All_Goals_Met'] = df['Goal_Deficit'] & df['Protein > 130']
+    BMR = 1950  # your stated BMR
+    BASE_LIGHT_TDEE = 2400  # your best current "real-world" light-day maintenance baseline
+    MEDIUM_BUMP = 200
+    HARD_BUMP = 400
+
+    # Helper: robust activity scoring using multiple signals
+    def classify_activity(row):
+        steps = row.get("Steps", 0) or 0
+        mins = row.get("Exercise Minutes", 0) or 0
+        garmin_total = row.get("Garmin_Total_Cals", BASE_LIGHT_TDEE) or BASE_LIGHT_TDEE
+
+        score = 0
+
+        # Steps signal
+        if steps >= 13000: score += 2
+        elif steps >= 9000: score += 1
+
+        # Exercise minutes signal
+        if mins >= 140: score += 2
+        elif mins >= 70: score += 1
+
+        # Garmin total calories signal (use as a *hint*, not truth)
+        # Compare above BMR, not absolute.
+        above_bmr = max(0, garmin_total - BMR)
+        if above_bmr >= 900: score += 2
+        elif above_bmr >= 650: score += 1
+
+        # Convert score → label
+        if score >= 4:
+            return "Hard"
+        elif score >= 2:
+            return "Medium"
+        else:
+            return "Light"
+
+    df["Activity_Level"] = df.apply(classify_activity, axis=1)
+
+    # Map activity level to estimated TDEE
+    level_to_bump = {"Light": 0, "Medium": MEDIUM_BUMP, "Hard": HARD_BUMP}
+    df["Estimated_TDEE"] = df["Activity_Level"].map(level_to_bump).fillna(0) + BASE_LIGHT_TDEE
+
+    # NEW deficit logic: estimated expenditure minus intake
+    df["Deficit"] = df["Estimated_TDEE"] - df["Calories Consumed"]
+    df["Goal_Deficit"] = df["Deficit"] > 0
+    df["All_Goals_Met"] = df["Goal_Deficit"] & df["Protein > 130"]
 
     # Rolling averages
     df['7Day_Rolling_Weight'] = df['Weight'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_BF'] = df['BF%'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Deficit'] = df['Deficit'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Steps'] = df['Steps'].rolling(7, min_periods=1).mean()
-    df['7Day_Rolling_Activity_Calories'] = df['Calories from Exercise'].rolling(7, min_periods=1).mean()
+    df['7Day_Rolling_Activity_Calories'] = df['Estimated_TDEE'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Consumed_Calories'] = df['Calories Consumed'].rolling(7, min_periods=1).mean()
     df['7Day_Rolling_Muscle'] = df['Muscle Mass'].rolling(7, min_periods=1).mean()
 
@@ -230,7 +272,7 @@ paired_plots = [
     ('Muscle Mass', '7Day_Rolling_Muscle'),
     ('Steps', '7Day_Rolling_Steps'),
     ('Calories Consumed', '7Day_Rolling_Consumed_Calories'),
-    ('Calories from Exercise', '7Day_Rolling_Activity_Calories'),
+    ('Estimated_TDEE', '7Day_Rolling_Activity_Calories'),
     ('Deficit', '7Day_Rolling_Deficit')
 ]
 
