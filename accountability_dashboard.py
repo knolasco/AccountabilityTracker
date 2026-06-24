@@ -48,7 +48,6 @@ numeric_cols = [
     'Weight',
     'Steps',
     'Muscle Mass',
-    'Protein > 130'
 ]
 
 for col in numeric_cols:
