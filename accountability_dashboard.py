@@ -55,6 +55,21 @@ for col in numeric_cols:
     if col in df.columns:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
+# Convert boolean columns
+if 'Protein > 130' in df.columns:
+    df['Protein > 130'] = (
+        df['Protein > 130']
+        .astype(str)
+        .str.upper()
+        .map({
+            'TRUE': True,
+            'FALSE': False,
+            '1': True,
+            '0': False
+        })
+        .fillna(False)
+    )
+
 
 # ==========================
 # Calculations
