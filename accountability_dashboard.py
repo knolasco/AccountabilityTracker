@@ -85,11 +85,7 @@ df['Deficit'] = (
 # Goals
 df['Goal_Deficit'] = df['Deficit'] > 0
 
-df['All_Goals_Met'] = (
-    df['Goal_Deficit']
-    &
-    df['Protein > 130']
-)
+df['All_Goals_Met'] = df['Goal_Deficit'] & df['Protein > 130']
 
 
 # Rolling averages
