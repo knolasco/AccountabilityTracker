@@ -41,6 +41,19 @@ df.sort_values(
     'Date',
     inplace=True
 )
+# Convert numeric columns from strings to numbers
+numeric_cols = [
+    'Calories from Exercise',
+    'Calories Consumed',
+    'Weight',
+    'Steps',
+    'Muscle Mass',
+    'Protein > 130'
+]
+
+for col in numeric_cols:
+    if col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
 
 
 # ==========================
